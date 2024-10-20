@@ -19,6 +19,7 @@ Finished ✅
 # Tech Stack & Frameworks (subject to change)
 <ul>
   <li> React JS </li>
+  <li> Vite </li>
   <li> Tailwind CSS </li>
   <li> MazeMap API </li>
   <li> Express </li>
