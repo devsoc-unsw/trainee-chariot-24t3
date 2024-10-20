@@ -1,6 +1,8 @@
 # Bored on Campus (subject to change)
 
-# Design
+# Figma Design
+https://www.figma.com/design/e8BnnHJeSDynMQrfMPi1RO/Team-Chariot?node-id=0-1&node-type=canvas&t=Kb4QHGNcOPrnR9fa-0
+
 Pending designs ⌛ 
 <ul>
   <li>Color palette?</li>
