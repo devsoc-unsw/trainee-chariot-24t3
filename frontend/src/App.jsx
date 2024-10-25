@@ -1,20 +1,23 @@
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import MapPage from "./screens/MapPage";
 import EventList from "./screens/EventList";
+import EventPage from "./screens/EventPage";
 import "./App.css";
 
 function App() {
   const navigate = useNavigate();
   return (
     <>
-      <div className="flex justify-evenly w-full">
-        <a onClick={() => navigate("/")}>Events</a>
-        <a onClick={() => navigate("/map")}>Map</a>
+      <div className="flex justify-evenly w-full cursor-pointer">
+        <a onClick={() => navigate("/")}>Map</a>
+        <a onClick={() => navigate("/eventList")}>EventList</a>
+        <a onClick={() => navigate("/eventPage")}>EventPage</a>
       </div>
 
       <Routes>
-        <Route path="/" element={<EventList />} />
-        <Route path="/map" element={<MapPage />} />
+        <Route path="/" element={<MapPage />} />
+        <Route path="/eventList" element={<EventList />} />
+        <Route path="/eventPage" element={<EventPage />} />
       </Routes>
     </>
   );
