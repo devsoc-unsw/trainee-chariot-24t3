@@ -1,4 +1,4 @@
-# Bored on Campus (subject to change)
+# Bored on Campus
 
 Pending designs ⌛ 
 <ul>
@@ -13,14 +13,14 @@ Finished ✅
   <li>Map page</li>
 </ul>
 
-# Tech Stack & Frameworks (subject to change)
+# Tech Stack & Frameworks
 <ul>
   <li> React JS </li>
+  <li> Express </li>
+  <li> Mongo DB </li>
   <li> Vite </li>
   <li> Tailwind CSS </li>
   <li> MazeMap API </li>
-  <li> Express </li>
-  <li> MongoDB </li>
 </ul>
 
 # Brainstorm 
