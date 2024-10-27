@@ -1,5 +1,18 @@
 #root {
-  max-width: screen;
-  margin: 0 auto;
+  width: 100%;
   text-align: center;
+}
+
+body,
+html {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+html,
+body,
+#root {
+  height: 100%;
 }
