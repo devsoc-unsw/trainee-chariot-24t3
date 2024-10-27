@@ -7,7 +7,7 @@ function useMazeMap() {
     campuses: 111,
     center: {lng: 151.231232432, lat:  -33.917529664 },
     zoom: 17,
-    zLevel: 3
+    zLevel: 1,
   }
 
   const map = new window.Mazemap.Map(mapOptions)
