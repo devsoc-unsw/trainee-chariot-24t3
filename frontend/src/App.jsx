@@ -8,10 +8,9 @@ function App() {
   const navigate = useNavigate();
   return (
     <>
-      <div className="flex justify-evenly w-full cursor-pointer">
-        <a onClick={() => navigate("/")}>Map</a>
-        <a onClick={() => navigate("/eventList")}>EventList</a>
-        <a onClick={() => navigate("/eventPage")}>EventPage</a>
+      <div className="flex justify-evenly w-full cursor-pointer bg-[#D9D9D9]">
+      <a onClick={() => navigate("/eventList")} className="font-bold text-xl p-2">EventList</a>
+        <a onClick={() => navigate("/")} className="font-bold text-xl p-2">Map</a>
       </div>
 
       <Routes>
