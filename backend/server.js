@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { connectDb } from "./config/db.js";
 import Event from "./models/event.model.js";
+
 dotenv.config();
 
 const app = express();
