@@ -11,7 +11,7 @@ const eventSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true } // mongoose will store createdAt and updatedAt everytime
 );
 
 const Event = mongoose.model("Event", eventSchema);
