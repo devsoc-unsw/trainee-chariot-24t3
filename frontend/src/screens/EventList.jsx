@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+
 function EventList() {
   const [activeButton, setActiveButton] = useState(1);
 
@@ -20,21 +21,28 @@ function EventList() {
   }
 
   return (
-    <div className="bg-[#FFF8D3] min-h-screen flex justify-start">
-      <div className="pl-10 pt-5"> 
-        <div className="justify pr-30 text-black">  
-          <h1> 
-            Events
-          </h1>
-        </div>
-        <div className="pt-4">
-          <NavigationList onActiveButtonChange={handleActiveButtonChange}/>
-        </div>
+    <div className="bg-[#FFF8D3] min-h-screen shadow-inner pl-10 pr-10 ">
+      <div className="flex justify-start text-3xl text-[#6F6F6F] pt-5 pb-5">  
+        Events
       </div>
-      <div className='w-full font-large flex justify-center items-center pt-16 h-full'>
-        <div className='text-3xl'>
-          <div> 
-            {getContent()}
+      <div className="flex justify-between">
+        <div className="flex"> 
+          <div className="flex">
+            <NavigationList onActiveButtonChange={handleActiveButtonChange}/>
+          </div>
+        </div>
+        <div className='container basis-auto font-large flex h-full justify-center'>
+          <div className='text-3xl text-center'>
+            <div> 
+              {getContent()}
+            </div>
+          </div>
+        </div>
+        <div className='container basis-auto font-large flex h-full justify-center'>
+          <div className='text-3xl text-center'>
+            <div> 
+              Event stuff
+            </div>
           </div>
         </div>
       </div>
@@ -52,85 +60,53 @@ function NavigationList({ onActiveButtonChange }) {
 
 
   return (
-    <div className="bg-[#D9D9D9] p-2 rounded-lg h-80 w-32">
-      <div className="flex-col justify-evenly"> 
-        <div className='w-full'> 
-          <Button
-          label="Upcoming"
-          variant={activeButton === 1 ? 'primary' : 'default'}
-          onClick={() => handleButtonClick(1)}
-          />
+    <div className="bg-[#D9D9D9] p-4 rounded-[20px] h-[46rem] w-64 flex flex-col content-between gap-[475px]">
+        <div className=''>  
+          <div className='w-full'> 
+            <Button
+            label="Upcoming"
+            variant={activeButton === 1 ? 'primary' : 'default'}
+            onClick={() => handleButtonClick(1)}
+            />
+          </div>
+          <div className='w-full'> 
+            <Button
+            label="Ongoing"
+            variant={activeButton === 2 ? 'primary' : 'default'}
+            onClick={() => handleButtonClick(2)}
+            />
+          </div>
+          <div className='w-full'> 
+            <Button
+            label="Newest"
+            variant={activeButton === 3 ? 'primary' : 'default'}
+            onClick={() => handleButtonClick(3)}
+            />
+          </div> 
         </div>
-        <div className='w-full'> 
-          <Button
-          label="Ongoing"
-          variant={activeButton === 2 ? 'primary' : 'default'}
-          onClick={() => handleButtonClick(2)}
-          />
-        </div>
-        <div className='w-full'> 
-          <Button
-          label="Newest"
-          variant={activeButton === 3 ? 'primary' : 'default'}
-          onClick={() => handleButtonClick(3)}
-          />
-        </div > 
-        <div className='mt-24'> 
+        <div className=''> 
           <Button
           label="+ Add Event"
           variant={'eventAdd'}
           />
         </div>
-      </div>
     </div>
   );
-}
-
-function Upcoming() {
-  return (
-    <div className="align-middle"> 
-      Upcoming
-    </div>
-  )
-}
-
-function Ongoing() {
-  return (
-    <div className=""> 
-      Ongoing
-    </div>
-  )
-}
-
-function New() {
-  return (
-    <div className=""> 
-      New
-    </div>
-  )
-}
-
-function newEvent() {
-  return (
-    <div className="black"> 
-      Event stuff
-    </div>
-  )
 }
 
 const Button = ({ label, type = 'button', variant = 'primary', onClick }) => {
   
   const variants = {
-    primary: 'bg-white font-bold font-large',
-    default: 'bg-[#D9D9D9] text-black hover:bg-gray-400 font-medium',
-    eventAdd: 'bg-orange-400 hover:bg-orange-500', 
+    primary: 'bg-white font-bold font-large text-3xl',
+    default: 'bg-[#D9D9D9] text-black hover:bg-gray-400 font-medium text-3xl',
+    eventAdd: 'bg-orange-400 hover:bg-orange-500 text-3xl	', 
   };
 
   return (
     <button
       type={type}
       onClick={onClick}
-      className={`px-4 py-2 rounded focus:outline-none ${variants[variant]} w-full mb-2`}
+      className={`px-4 py-2 rounded-[14px] focus:outline-none ${variants[variant]} w-full mb-2`}
     >
       {label}
     </button>
