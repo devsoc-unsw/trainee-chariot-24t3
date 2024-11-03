@@ -16,6 +16,7 @@ import CreateIcon from "@mui/icons-material/Create";
 import TurnedInIcon from "@mui/icons-material/TurnedIn";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import CloseIcon from "@mui/icons-material/Close";
+import { useNavigate } from "react-router-dom";
 
 function useMazeMap() {
 	const mapOptions = {
@@ -31,6 +32,8 @@ function useMazeMap() {
 }
 
 function AnchorTemporaryDrawer() {
+	const navigate = useNavigate();
+
 	const [state, setState] = React.useState({
 		left: false,
 	});
@@ -46,11 +49,11 @@ function AnchorTemporaryDrawer() {
 	};
 
 	const menuItems = [
-		{ text: "", icon: <CloseIcon /> },
-		{ text: "Create New Event", icon: <PlaceIcon /> },
-		{ text: "Edit Event", icon: <CreateIcon /> },
-		{ text: "Saved", icon: <TurnedInIcon /> },
-		{ text: "Today's Events", icon: <ListAltIcon /> },
+		{ text: "", icon: <CloseIcon />, action: "" },
+		{ text: "Create New Event", icon: <PlaceIcon />, action: "" },
+		{ text: "Edit Event", icon: <CreateIcon />, action: "" },
+		{ text: "Saved", icon: <TurnedInIcon />, action: "" },
+		{ text: "Event List", icon: <ListAltIcon />, action: "/eventList" },
 	];
 
 	const list = (anchor) => (
@@ -61,9 +64,9 @@ function AnchorTemporaryDrawer() {
 			onKeyDown={toggleDrawer(anchor, false)}
 		>
 			<List>
-				{menuItems.map(({ text, icon }) => (
+				{menuItems.map(({ text, icon, action }) => (
 					<ListItem key={text} disablePadding>
-						<ListItemButton>
+						<ListItemButton onClick={() => navigate(action)}>
 							<ListItemIcon>{icon}</ListItemIcon>
 							<ListItemText primary={text} />
 						</ListItemButton>
