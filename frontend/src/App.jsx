@@ -18,7 +18,6 @@ function App() {
           </p>
         </div>
         <div className="flex gap-2"> 
-          <a onClick={() => navigate("/eventList")} className="flex p-2 items-center gap-2"> <CalendarMonthIcon sx={{ fontSize: 48 }} /> Events</a>
           <a onClick={() => navigate("/")} className="p-2 flex items-center gap-2"><MapIcon sx={{ fontSize: 48 }}  /> View Events On Map</a>
         </div>
         

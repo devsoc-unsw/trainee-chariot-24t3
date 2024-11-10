@@ -21,7 +21,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import TextField from "@mui/material/TextField";
+import { useNavigate } from "react-router-dom";
 
 function useMazeMap() {
 	const mapOptions = {
@@ -67,7 +67,7 @@ function useMazeMap() {
 
 
 function AnchorTemporaryDrawer() {
-	const router = useState();
+	const navigate = useNavigate();
 
 	const [state, setState] = useState({
 		left: false,
@@ -113,11 +113,7 @@ function AnchorTemporaryDrawer() {
 		},
 		{ text: "Edit Event", icon: <CreateIcon />, action: "" },
 		{ text: "Saved", icon: <TurnedInIcon />, action: "" },
-		{
-			text: "Event List",
-			icon: <ListAltIcon />,
-			action: () => router.push("/eventList"),
-		},
+		{ text: "Event List", icon: <ListAltIcon />, action: "/eventList" },
 	];
 
 	const list = (anchor) => (
@@ -131,7 +127,9 @@ function AnchorTemporaryDrawer() {
 				{menuItems.map(({ text, icon, action }) => (
 					<ListItem key={text} disablePadding>
 						<ListItemButton
-							onClick={typeof action === "function" ? action : () => {}}
+							onClick={() =>
+								typeof action === "function" ? action() : navigate(action)
+							}
 						>
 							<ListItemIcon>{icon}</ListItemIcon>
 							<ListItemText primary={text} />
@@ -142,7 +140,7 @@ function AnchorTemporaryDrawer() {
 			<Divider />
 		</Box>
 	);
-  
+
 	return (
 		<div className="absolute top-auto left-auto z-10">
 			<Button onClick={toggleDrawer("left", true)}>
@@ -164,14 +162,14 @@ function AnchorTemporaryDrawer() {
 					Create New Event
 				</DialogTitle>
 				<DialogContent style={{ backgroundColor: "#CFCFCF" }}>
-					<div id="Event-Name-Container" style={{paddingBottom: "2rem"}}>
-							<input
-								id="Event Name"
-								className="search-input"
-								type="text"
-								name="Event"
-								placeholder="Event Name"
-							/>
+					<div id="Event-Name-Container" style={{ paddingBottom: "2rem" }}>
+						<input
+							id="Event Name"
+							className="search-input"
+							type="text"
+							name="Event"
+							placeholder="Event Name"
+						/>
 					</div>
 					<div id="search-input-container" className="search-control-default">
 						<form id="searchForm" className="search-form default">
