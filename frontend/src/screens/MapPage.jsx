@@ -21,125 +21,123 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import { useNavigate } from "react-router-dom";
 
 function useMazeMap() {
-	const mapOptions = {
-		container: "map",
-		campuses: 111,
-		center: { lng: 151.231232432, lat: -33.917529664 },
-		zoom: 16.2,
-		zLevel: 1,
-	};
+  const mapOptions = {
+    container: "map",
+    campuses: 111,
+    center: { lng: 151.231232432, lat: -33.917529664 },
+    zoom: 16.2,
+    zLevel: 1,
+  };
 
   const mySearch = new Mazemap.Search.SearchController({
-		campusid: 111,
-		rows: 10,
-		withpois: true,
-		withbuilding: false,
-		withtype: false,
-		withcampus: false,
+    campusid: 111,
+    rows: 10,
+    withpois: true,
+    withbuilding: false,
+    withtype: false,
+    withcampus: false,
 
-		resultsFormat: "geojson",
-	});
+    resultsFormat: "geojson",
+  });
 
-	useEffect(() => {
-		if (typeof window !== "undefined" && window.Mazemap) {
-			const map = new window.Mazemap.Map(mapOptions);
-			map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
-		}
-		// Ensure the search input exists before initializing the search
-		const searchInputElement = document.getElementById("searchInput");
-		if (searchInputElement) {
-			const mySearchInput = new Mazemap.Search.SearchInput({
-				container: document.getElementById("search-input-container"),
-				input: searchInputElement,
-				suggestions: document.getElementById("suggestions"),
-				searchController: mySearch,
-			}).on("itemclick", function (e) {
-			});
-      searchInputElement.addEventListener("input", () => {
-				mySearchInput.trigger();
-			});
-		}
-	}, []);
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.Mazemap) {
+      const map = new window.Mazemap.Map(mapOptions);
+      map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
+    }
+    // Ensure the search input exists before initializing the search
+    const searchInputElement = document.getElementById("searchInput");
+    if (searchInputElement) {
+      const mySearchInput = new Mazemap.Search.SearchInput({
+        container: document.getElementById("search-input-container"),
+        input: searchInputElement,
+        suggestions: document.getElementById("suggestions"),
+        searchController: mySearch,
+      }).on("itemclick", function (e) {
+        searchInputElement.addEventListener("input", () => {
+          mySearchInput.trigger();
+        });
+      });
+    }
+  }, []);
 }
 
-
 function AnchorTemporaryDrawer() {
-	const navigate = useNavigate();
+  const router = useState();
 
-	const [state, setState] = useState({
-		left: false,
-	});
+  const [state, setState] = useState({
+    left: false,
+  });
 
-	const [openDialog, setOpenDialog] = useState(false);
-	const [eventName, setEventName] = useState("");
-	const [eventLocation, setEventLocation] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [eventName, setEventName] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
 
-	const toggleDrawer = (anchor, open) => (event) => {
-		if (
-			event.type === "keydown" &&
-			(event.key === "Tab" || event.key === "Shift")
-		) {
-			return;
-		}
-		setState({ ...state, [anchor]: open });
-	};
+  const toggleDrawer = (anchor, open) => (event) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    setState({ ...state, [anchor]: open });
+  };
 
-	const handleCreateEvent = () => {
-		setOpenDialog(true);
-		setState({ ...state, left: false });
-	};
+  const handleCreateEvent = () => {
+    setOpenDialog(true);
+    setState({ ...state, left: false });
+  };
 
-	const handleCloseDialog = () => {
-		setOpenDialog(false);
-	};
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
 
-	const handleSubmitEvent = () => {
-		// send stuff to backend
-		console.log("Event created:", { name: eventName, location: eventLocation });
-		setOpenDialog(false);
-		setEventName("");
-		setEventLocation("");
-	};
+  const handleSubmitEvent = () => {
+    // send stuff to backend
+    console.log("Event created:", { name: eventName, location: eventLocation });
+    setOpenDialog(false);
+    setEventName("");
+    setEventLocation("");
+  };
 
-	const menuItems = [
-		{ text: "", icon: <CloseIcon />, action: "" },
-		{
-			text: "Create New Event",
-			icon: <PlaceIcon />,
-			action: handleCreateEvent,
-		},
-		{ text: "Edit Event", icon: <CreateIcon />, action: "" },
-		{ text: "Saved", icon: <TurnedInIcon />, action: "" },
-		{ text: "Event List", icon: <ListAltIcon />, action: "/eventList" },
-	];
+  const menuItems = [
+    { text: "", icon: <CloseIcon />, action: "" },
+    {
+      text: "Create New Event",
+      icon: <PlaceIcon />,
+      action: handleCreateEvent,
+    },
+    { text: "Edit Event", icon: <CreateIcon />, action: "" },
+    { text: "Saved", icon: <TurnedInIcon />, action: "" },
+    { text: "Event List", icon: <ListAltIcon />, action: "/eventList" },
+  ];
 
-	const list = (anchor) => (
-		<Box
-			sx={{ width: anchor === "top" || anchor === "bottom" ? "auto" : 300 }}
-			role="presentation"
-			onClick={toggleDrawer(anchor, false)}
-			onKeyDown={toggleDrawer(anchor, false)}
-		>
-			<List>
-				{menuItems.map(({ text, icon, action }) => (
-					<ListItem key={text} disablePadding>
-						<ListItemButton
-							onClick={() =>
-								typeof action === "function" ? action() : navigate(action)
-							}
-						>
-							<ListItemIcon>{icon}</ListItemIcon>
-							<ListItemText primary={text} />
-						</ListItemButton>
-					</ListItem>
-				))}
-			</List>
-			<Divider />
-		</Box>
-	);
+  const list = (anchor) => (
+    <Box
+      sx={{ width: anchor === "top" || anchor === "bottom" ? "auto" : 300 }}
+      role="presentation"
+      onClick={toggleDrawer(anchor, false)}
+      onKeyDown={toggleDrawer(anchor, false)}
+    >
+      <List>
+        {menuItems.map(({ text, icon, action }) => (
+          <ListItem key={text} disablePadding>
+            <ListItemButton
+              onClick={() =>
+                typeof action === "function" ? action() : navigate(action)
+              }
+            >
+              <ListItemIcon>{icon}</ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+    </Box>
+  );
 
 	return (
 		<div className="absolute top-auto left-auto z-10">
@@ -214,14 +212,14 @@ function AnchorTemporaryDrawer() {
 }
 
 export default function MapPage() {
-	useMazeMap();
+  useMazeMap();
 
-	return (
-		<div className="flex h-screen">
-			<AnchorTemporaryDrawer />
-			<div className="relative flex-grow w-screen h-screen rounded-lg shadow-lg overflow-hidden">
-				<div id="map" className="absolute inset-0" />
-			</div>
-		</div>
-	);
+  return (
+    <div className="flex h-screen">
+      <AnchorTemporaryDrawer />
+      <div className="relative flex-grow w-screen h-screen rounded-lg shadow-lg overflow-hidden">
+        <div id="map" className="absolute inset-0" />
+      </div>
+    </div>
+  );
 }
