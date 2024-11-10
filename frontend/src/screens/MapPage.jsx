@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import * as React from "react";
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
@@ -17,6 +16,10 @@ import TurnedInIcon from "@mui/icons-material/TurnedIn";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 
 function useMazeMap() {
   const mapOptions = {
@@ -175,7 +178,6 @@ function AnchorTemporaryDrawer() {
                 tabIndex="0"
                 id="searchInput"
                 className="search-input"
-                autocomplete="off"
                 type="text"
                 name="search"
                 placeholder="Location"

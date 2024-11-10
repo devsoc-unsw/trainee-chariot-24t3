@@ -4,6 +4,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import MapPage from "./screens/MapPage";
 import EventList from "./screens/EventList";
 import EventPage from "./screens/EventPage";
+import Dummy from "./screens/Dummy";
 // import LostOnCampusLogo from "./assets/locLogo.png";
 import "./App.css";
 
