@@ -57,9 +57,9 @@ function useMazeMap() {
 				suggestions: document.getElementById("suggestions"),
 				searchController: mySearch,
 			}).on("itemclick", function (e) {
-				searchInputElement.addEventListener("input", () => {
-					mySearchInput.trigger();
-				});
+			});
+      searchInputElement.addEventListener("input", () => {
+				mySearchInput.trigger();
 			});
 		}
 	}, []);
@@ -161,7 +161,7 @@ function AnchorTemporaryDrawer() {
 				<DialogTitle style={{ backgroundColor: "#CFCFCF" }}>
 					Create New Event
 				</DialogTitle>
-				<DialogContent style={{ backgroundColor: "#CFCFCF" }}>
+				<DialogContent style={{ backgroundColor: "#CFCFCF", width: screen }}>
 					<div id="Event-Name-Container" style={{ paddingBottom: "2rem" }}>
 						<input
 							id="Event Name"
@@ -169,6 +169,24 @@ function AnchorTemporaryDrawer() {
 							type="text"
 							name="Event"
 							placeholder="Event Name"
+						/>
+					</div>
+					<div id="Time-Container" style={{ paddingBottom: "2rem" }}>
+						<input
+							id="Event time"
+							className="search-input"
+							type="text"
+							name="Event"
+							placeholder="Time"
+						/>
+					</div>
+					<div id="Description-Container" style={{ paddingBottom: "2rem" }}>
+						<input
+							id="Description"
+							className="search-input"
+							type="text"
+							name="Event"
+							placeholder="Description"
 						/>
 					</div>
 					<div id="search-input-container" className="search-control-default">
