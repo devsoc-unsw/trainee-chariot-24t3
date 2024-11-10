@@ -37,6 +37,17 @@ app.post("/event/create", async (req, res) => {
   }
 });
 
+app.delete("/api/events/:id", async (req, res) => {
+  const newEvent = new Event(event);
+  try {
+    await Event.deleteById(req.params.id);
+    return res.status(201).json({ success: true, data: newEvent });
+  } catch (err) {
+    console.error("Error in deleting event", err.message);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // start the Express server
