@@ -1,4 +1,7 @@
+"use client";
+
 import { useEffect, useState } from "react";
+import * as React from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
@@ -9,12 +12,15 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import PlaceIcon from "@mui/icons-material/Place";
 import CreateIcon from "@mui/icons-material/Create";
 import TurnedInIcon from "@mui/icons-material/TurnedIn";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import CloseIcon from "@mui/icons-material/Close";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import { useNavigate } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -41,16 +47,14 @@ function useMazeMap() {
     resultsFormat: "geojson",
   });
 
-  const searchInputElement = document.getElementById("searchInput");
   useEffect(() => {
     if (typeof window !== "undefined" && window.Mazemap) {
       const map = new window.Mazemap.Map(mapOptions);
       map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
     }
-
     // Ensure the search input exists before initializing the search
+    const searchInputElement = document.getElementById("searchInput");
     if (searchInputElement) {
-      console.log("I RUN");
       const mySearchInput = new Mazemap.Search.SearchInput({
         container: document.getElementById("search-input-container"),
         input: searchInputElement,
@@ -62,7 +66,7 @@ function useMazeMap() {
         });
       });
     }
-  }, [searchInputElement]);
+  }, []);
 }
 
 function AnchorTemporaryDrawer() {
@@ -112,11 +116,7 @@ function AnchorTemporaryDrawer() {
     },
     { text: "Edit Event", icon: <CreateIcon />, action: "" },
     { text: "Saved", icon: <TurnedInIcon />, action: "" },
-    {
-      text: "Event List",
-      icon: <ListAltIcon />,
-      action: () => router.push("/eventList"),
-    },
+    { text: "Event List", icon: <ListAltIcon />, action: "/eventList" },
   ];
 
   const list = (anchor) => (
@@ -130,7 +130,9 @@ function AnchorTemporaryDrawer() {
         {menuItems.map(({ text, icon, action }) => (
           <ListItem key={text} disablePadding>
             <ListItemButton
-              onClick={typeof action === "function" ? action : () => {}}
+              onClick={() =>
+                typeof action === "function" ? action() : navigate(action)
+              }
             >
               <ListItemIcon>{icon}</ListItemIcon>
               <ListItemText primary={text} />
@@ -178,6 +180,7 @@ function AnchorTemporaryDrawer() {
                 tabIndex="0"
                 id="searchInput"
                 className="search-input"
+                autocomplete="off"
                 type="text"
                 name="search"
                 placeholder="Location"
