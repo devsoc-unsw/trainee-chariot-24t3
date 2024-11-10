@@ -5,7 +5,7 @@ import MapPage from "./screens/MapPage";
 import EventList from "./screens/EventList";
 import EventPage from "./screens/EventPage";
 import Dummy from "./screens/Dummy";
-// import LostOnCampusLogo from "./assets/locLogo.png";
+import LostOnCampusLogo from "./assets/locLogo.png";
 import "./App.css";
 
 function App() {
@@ -14,7 +14,7 @@ function App() {
     <>
       <div className="flex cursor-pointer bg-[#FFA438] h-20 justify-between text-4xl pl-10 pr-10 items-center">
         <div className="flex gap-4 items-center">
-          {/* <img src={LostOnCampusLogo} alt="LostOnCampus Logo"></img> */}
+          <img src={LostOnCampusLogo} alt="LostOnCampus Logo"></img>
           <p>
             Bored<a className="text-yellow-300	">On</a>Campus
           </p>
