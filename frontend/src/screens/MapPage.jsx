@@ -1,27 +1,32 @@
-"use client";
+'use client'
 
-import { useEffect, useState, useRef } from "react";
-import * as React from "react";
-import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
-import Button from "@mui/material/Button";
-import List from "@mui/material/List";
-import Divider from "@mui/material/Divider";
-import MenuIcon from "@mui/icons-material/Menu";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import PlaceIcon from "@mui/icons-material/Place";
-import CreateIcon from "@mui/icons-material/Create";
-import TurnedInIcon from "@mui/icons-material/TurnedIn";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import CloseIcon from "@mui/icons-material/Close";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useRef } from "react"
+import * as React from "react"
+import Box from "@mui/material/Box"
+import Drawer from "@mui/material/Drawer"
+import Button from "@mui/material/Button"
+import List from "@mui/material/List"
+import Divider from "@mui/material/Divider"
+import MenuIcon from "@mui/icons-material/Menu"
+import ListItem from "@mui/material/ListItem"
+import ListItemButton from "@mui/material/ListItemButton"
+import ListItemIcon from "@mui/material/ListItemIcon"
+import ListItemText from "@mui/material/ListItemText"
+import PlaceIcon from "@mui/icons-material/Place"
+import CreateIcon from "@mui/icons-material/Create"
+import TurnedInIcon from "@mui/icons-material/TurnedIn"
+import ListAltIcon from "@mui/icons-material/ListAlt"
+import CloseIcon from "@mui/icons-material/Close"
+import Dialog from "@mui/material/Dialog"
+import DialogActions from "@mui/material/DialogActions"
+import DialogContent from "@mui/material/DialogContent"
+import DialogTitle from "@mui/material/DialogTitle"
+import { TextField } from "@mui/material"
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker'
+import { useNavigate } from "react-router-dom"
 
 function useMazeMap() {
   const mapRef = useRef(null)
@@ -91,13 +96,18 @@ function useMazeMap() {
 }
 
 function AnchorTemporaryDrawer() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [state, setState] = useState({
     left: false,
   })
 
   const [openDialog, setOpenDialog] = useState(false)
   const { searchInputRef, suggestionsRef } = useMazeMap()
+
+  const [eventName, setEventName] = useState("")
+  const [eventDate, setEventDate] = useState(null)
+  const [eventTime, setEventTime] = useState(null)
+  const [eventLocation, setEventLocation] = useState("")
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -113,6 +123,46 @@ function AnchorTemporaryDrawer() {
 
   const handleCloseDialog = () => {
     setOpenDialog(false)
+    setEventName("")
+    setEventDate(null)
+    setEventTime(null)
+    setEventLocation("")
+  }
+
+  const handleSubmitEvent = async () => {
+    // Validate inputs
+    if (!eventName || !eventDate || !eventTime || !eventLocation) {
+      alert("Please fill in all fields")
+      return
+    }
+
+    // Prepare event data
+    const eventData = {
+      name: eventName,
+      date: eventDate,
+      time: eventTime,
+      location: eventLocation,
+    }
+
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventData),
+      })
+
+      if (response.ok) {
+        alert('Event created successfully!')
+        handleCloseDialog()
+      } else {
+        alert('Failed to create event. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error creating event:', error)
+      alert('An error occurred while creating the event. Please try again.')
+    }
   }
 
   const menuItems = [
@@ -165,34 +215,47 @@ function AnchorTemporaryDrawer() {
           Create New Event
         </DialogTitle>
         <DialogContent style={{ backgroundColor: '#CFCFCF' }}>
-          <div id="Event-Name-Container" style={{ paddingBottom: '2rem' }}>
-            <input
-              id="Event Name"
-              className="search-input"
-              type="text"
-              name="Event"
-              placeholder="Event Name"
+          <div className="space-y-4 mt-4">
+            <TextField
+              fullWidth
+              label="Event Name"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
             />
-          </div>
-          <div id="search-input-container" className="search-control-default">
-            <form id="searchForm" className="search-form default">
-              <input
-                ref={searchInputRef}
-                tabIndex={0}
-                id="searchInput"
-                className="search-input"
-                autoComplete="off"
-                type="text"
-                name="search"
-                placeholder="Location"
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <Box 
+                display={'flex'}
+                justifyContent={'space-between'}
+                gap={2}
+              ><DatePicker
+                label="Event Date"
+                value={eventDate}
+                onChange={(newValue) => setEventDate(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
               />
-            </form>
-            <div ref={suggestionsRef} id="suggestions" className="search-suggestions default"></div>
+              <TimePicker
+                label="Event Time"
+                value={eventTime}
+                onChange={(newValue) => setEventTime(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              </Box>
+            </LocalizationProvider>
+            <div id="search-input-container" className="search-control-default">
+              <TextField
+                fullWidth
+                label="Location"
+                inputRef={searchInputRef}
+                value={eventLocation}
+                onChange={(e) => setEventLocation(e.target.value)}
+              />
+              <div ref={suggestionsRef} id="suggestions" className="search-suggestions default"></div>
+            </div>
           </div>
         </DialogContent>
         <DialogActions style={{ backgroundColor: '#CFCFCF' }}>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleCloseDialog}>Create</Button>
+          <Button onClick={handleSubmitEvent}>Create</Button>
         </DialogActions>
       </Dialog>
     </div>
