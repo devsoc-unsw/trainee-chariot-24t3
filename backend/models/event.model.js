@@ -2,14 +2,15 @@ import mongoose from "mongoose";
 
 const eventSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-    },
-    date: {
-      type: String,
-      required: true,
-    },
+    name: { type: String, required: true },
+    date: { type: Date, required: true },
+    time: { type: String, required: true },
+    location: {
+      lat: { type: Number, required: true },
+      lng: { type: Number, required: true },
+      building: { type: String },
+      room: { type: String }
+    }
   },
   { timestamps: true } // mongoose will store createdAt and updatedAt everytime
 );

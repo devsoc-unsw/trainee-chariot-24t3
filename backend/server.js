@@ -37,6 +37,35 @@ app.post("/event/create", async (req, res) => {
   }
 });
 
+// POST route to create a new event
+app.post('/api/events', async (req, res) => {
+  try {
+    const { name, date, time, location } = req.body;
+
+    // Validate inputs
+    if (!name || !date || !time || !location || !location.lat || !location.lng) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const newEvent = new Event({
+      name,
+      date,
+      time,
+      location: {
+        lat: location.lat,
+        lng: location.lng,
+        building: location.building,
+        room: location.room
+      }
+    });
+
+    await newEvent.save();
+    res.status(200).json({ message: 'Event created successfully', event: newEvent });
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ error: 'An error occurred while creating the event' });
+  }
+});
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // start the Express server
