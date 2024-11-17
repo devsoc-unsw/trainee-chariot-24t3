@@ -22,6 +22,27 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 
+function createMarker(markerCoords, map, poi) {
+  
+  const lngLat = Mazemap.Util.getPoiLngLat(poi);
+  console.log(lngLat);
+  console.log(markerCoords);
+  let color = '#ff00cc';
+  if (markerCoords && lngLat.lng === markerCoords.lng && lngLat.lat === markerCoords.lat) {
+    color = '#ffffff';
+  } 
+  const marker = new Mazemap.MazeMarker({
+    color: color,
+    innerCircle: true,
+    innerCircleColor: '#FFF',
+    size: 34,
+    innerCircleScale: 0.5,
+    zLevel: poi.properties.zLevel
+  })
+  .setLngLat(lngLat)
+  .addTo(map);
+};
+
 function useMazeMap() {
   const mapOptions = {
     container: "map",
@@ -42,10 +63,24 @@ function useMazeMap() {
     resultsFormat: "geojson",
   });
 
+  const [marker, setMarker] = useState(null);
+
   useEffect(() => {
     if (typeof window !== "undefined" && window.Mazemap) {
       const map = new window.Mazemap.Map(mapOptions);
-      map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
+      map.on('click', onMapClick);
+
+      function onMapClick(e){
+
+        const lngLat = e.lngLat;
+        const zLevel = map.zLevel;
+        // Fetching via Data API
+        Mazemap.Data.getPoiAt(lngLat, zLevel).then( poi => {
+            setMarker(Mazemap.Util.getPoiLngLat(poi));
+            createMarker(marker, map, poi);
+      
+        }).catch( function(){ return false; } );
+      }
     }
     // Ensure the search input exists before initializing the search
     const searchInputElement = document.getElementById("searchInput");
