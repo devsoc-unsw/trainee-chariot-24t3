@@ -80,7 +80,7 @@ async function eventList(state) {
 
     return eventList; 
   } catch (error) {
-    throw error; 
+    throw new Error('Unable to get the event List');
   }
 }
 
