@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import arcLogo from "../assets/arcLogo.jpg";
 import climateExpo from "../assets/climateExpo.jpg";
+import axios from "axios";
 
+const PORT = 5050;
 
 const pictures = {
   arcLogo: arcLogo,
@@ -49,48 +51,56 @@ function EventList() {
                 title = "DevSoc Pizza Party" 
                 location = "Laws 103, 8am - 2pm Fri, May 9, 2025 - May 11, 2025"
                 body = {truncateText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore e...")}
+                button = {deleteButton()}
               />
               <EventDetails 
                 picture = "climateExpo" 
                 title = "Futures Expo Series" 
                 location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
                 body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
+                button = {deleteButton()}
               />
               <EventDetails 
                 picture = "climateExpo" 
                 title = "Futures Expo Series" 
                 location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
                 body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
+                button = {deleteButton()}
               />
               <EventDetails 
                 picture = "climateExpo" 
                 title = "Futures Expo Series" 
                 location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
                 body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
+                button = {deleteButton()}
               />
               <EventDetails 
                 picture = "climateExpo" 
                 title = "Futures Expo Series" 
                 location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
                 body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
+                button = {deleteButton()}
               />
               <EventDetails 
                 picture = "climateExpo" 
                 title = "Futures Expo Series" 
                 location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
                 body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
+                button = {deleteButton()}
               />
               <EventDetails 
                 picture = "climateExpo" 
                 title = "Futures Expo Series" 
                 location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
                 body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
+                button = {deleteButton()}
               />
               <EventDetails 
                 picture = "climateExpo" 
                 title = "Futures Expo Series" 
                 location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
                 body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
+                button = {deleteButton()}
               />
             </div>
           </div>
@@ -169,7 +179,7 @@ const Button = ({ label, type = 'button', variant = 'primary', onClick }) => {
   );
 };
 
-function EventDetails({picture, title, location, body}) {
+function EventDetails({picture, title, location, body, button}) {
   const getPicture = (picture) => {
     return pictures[picture] || arcLogo; 
   };
@@ -182,6 +192,9 @@ function EventDetails({picture, title, location, body}) {
           alt="Event picture"
           className="w-full h-full object-cover  rounded-[30px]"
         />
+        <div className="p-6 items-center">
+          {button}
+        </div>
       </div>
       
       <div className="flex flex-col text-left">
@@ -256,4 +269,30 @@ function truncateText(text) {
   }
   return text;
 }
+
+function deleteButton(id) {
+  const deleteEvent = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.delete(`http://localhost:${PORT}/api/events/${id}`, {
+        
+      });
+      console.log("Event deleted successfully");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="justify-center flex items-center">
+      <button
+        className=" flex w-96 gap-2 p-5 bg-[#FF9980] z-10 rounded-[30px] justify-center items-center text-2xl"
+        onClick = {deleteEvent}
+      >
+        Delete Event
+      </button>
+    </div>
+  );
+}
+
 export default EventList;
