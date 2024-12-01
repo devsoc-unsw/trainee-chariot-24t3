@@ -22,15 +22,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 
-function createMarker(markerCoords, map, poi) {
-  
+function createMarker(map, poi, color) {
   const lngLat = Mazemap.Util.getPoiLngLat(poi);
-  console.log(lngLat);
-  console.log(markerCoords);
-  let color = '#ff00cc';
-  if (markerCoords && lngLat.lng === markerCoords.lng && lngLat.lat === markerCoords.lat) {
-    color = '#ffffff';
-  } 
   const marker = new Mazemap.MazeMarker({
     color: color,
     innerCircle: true,
@@ -41,7 +34,12 @@ function createMarker(markerCoords, map, poi) {
   })
   .setLngLat(lngLat)
   .addTo(map);
-};
+
+  marker.on("click", () => {
+    marker.remove();
+    createMarker(map, poi, "#000000");
+  });
+}
 
 function useMazeMap() {
   const mapOptions = {
@@ -63,22 +61,17 @@ function useMazeMap() {
     resultsFormat: "geojson",
   });
 
-  const [marker, setMarker] = useState(null);
-
   useEffect(() => {
     if (typeof window !== "undefined" && window.Mazemap) {
       const map = new window.Mazemap.Map(mapOptions);
       map.on('click', onMapClick);
 
       function onMapClick(e){
-
         const lngLat = e.lngLat;
         const zLevel = map.zLevel;
-        // Fetching via Data API
+
         Mazemap.Data.getPoiAt(lngLat, zLevel).then( poi => {
-            setMarker(Mazemap.Util.getPoiLngLat(poi));
-            createMarker(marker, map, poi);
-      
+          createMarker(map, poi, "#ff00cc");
         }).catch( function(){ return false; } );
       }
     }
