@@ -28,7 +28,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { useNavigate } from "react-router-dom"
 
-function useMazeMap() {
+function useMazeMap(setEventLocation) {
   const mapRef = useRef(null)
   const searchInputRef = useRef(null)
   const suggestionsRef = useRef(null)
@@ -68,10 +68,19 @@ function useMazeMap() {
           searchController: mySearch,
         })
 
-        mySearchInput.on('resultselected', function (e) {
-          console.log('Search result selected:', e)
-          // Handle the selected location here
-        })
+        mySearchInput.on("itemclick", function (e) { 
+          const selectedResult = e.item;
+          if (selectedResult) {
+            const { geometry, properties } = selectedResult;
+            setEventLocation({
+              lat: geometry.coordinates[1],
+              lng: geometry.coordinates[0],
+              building: properties.buildingname || '',
+              room: properties.title || '',
+            });
+            console.log("hi");
+          }
+        });
 
         searchInputInstanceRef.current = mySearchInput
 
@@ -102,12 +111,13 @@ function AnchorTemporaryDrawer() {
   })
 
   const [openDialog, setOpenDialog] = useState(false)
-  const { searchInputRef, suggestionsRef } = useMazeMap()
 
   const [eventName, setEventName] = useState("")
   const [eventDate, setEventDate] = useState(null)
   const [eventTime, setEventTime] = useState(null)
-  const [eventLocation, setEventLocation] = useState("")
+  const [eventLocation, setEventLocation] = useState({ lat: null, lng: null, building: "", room: "" });
+
+  const { searchInputRef, suggestionsRef } = useMazeMap(setEventLocation);
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -129,41 +139,41 @@ function AnchorTemporaryDrawer() {
     setEventLocation("")
   }
 
-  const handleSubmitEvent = async () => {
-    // Validate inputs
-    if (!eventName || !eventDate || !eventTime || !eventLocation) {
-      alert("Please fill in all fields")
-      return
-    }
-
-    // Prepare event data
-    const eventData = {
-      name: eventName,
-      date: eventDate,
-      time: eventTime,
-      location: eventLocation,
-    }
-
-    try {
-      const response = await fetch('/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(eventData),
-      })
-
-      if (response.ok) {
-        alert('Event created successfully!')
-        handleCloseDialog()
-      } else {
-        alert('Failed to create event. Please try again.')
-      }
-    } catch (error) {
-      console.error('Error creating event:', error)
-      alert('An error occurred while creating the event. Please try again.')
-    }
+const handleSubmitEvent = async () => {
+  if (!eventLocation.lat || !eventLocation.lng) {
+    console.log(eventLocation);
+    alert("Please select a valid location from the map search box.");
+    return;
   }
+
+  const eventData = {
+    name: eventName,
+    date: eventDate,
+    time: eventTime,
+    location: eventLocation,
+  };
+
+  try {
+    const response = await fetch("http://localhost:5050/event/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(eventData),
+    });
+
+    if (response.ok) {
+      alert("Event created successfully!");
+      handleCloseDialog();
+    } else {
+      consoles.log(response);
+      alert("Failed to create event. Please try again.");
+    }
+  } catch (error) {
+    console.error("Error creating event:", error);
+    alert("An error occurred while creating the event. Please try again.");
+  }
+};
 
   const menuItems = [
     { text: "", icon: <CloseIcon />, action: toggleDrawer('left', false) },
@@ -221,6 +231,7 @@ function AnchorTemporaryDrawer() {
               label="Event Name"
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
+              autoComplete="off"
             />
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <Box 
@@ -246,8 +257,7 @@ function AnchorTemporaryDrawer() {
                 fullWidth
                 label="Location"
                 inputRef={searchInputRef}
-                value={eventLocation}
-                onChange={(e) => setEventLocation(e.target.value)}
+                autoComplete="off"
               />
               <div ref={suggestionsRef} id="suggestions" className="search-suggestions default"></div>
             </div>
