@@ -1,5 +1,5 @@
 "use client";
-
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import * as React from "react";
 import Box from "@mui/material/Box";
@@ -114,7 +114,10 @@ function AnchorTemporaryDrawer() {
     { text: "Event List", icon: <ListAltIcon />, action: "/eventList" },
   ];
 
+  const navigate = useNavigate();
+  
   const list = (anchor) => (
+
     <Box
       sx={{ width: anchor === "top" || anchor === "bottom" ? "auto" : 300 }}
       role="presentation"
