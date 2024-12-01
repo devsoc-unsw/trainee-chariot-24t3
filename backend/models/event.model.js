@@ -3,11 +3,10 @@ import mongoose from "mongoose";
 const eventSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    date: { type: Date, required: true },
-    time: { type: String, required: true },
+    date: { type: Date, required: false },
+    time: { type: String, required: false },
     location: {
-      lat: { type: Number, required: true },
-      lng: { type: Number, required: true },
+      coords: {type: Number, type: Number}, 
       building: { type: String },
       room: { type: String }
     }
