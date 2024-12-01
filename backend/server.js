@@ -42,15 +42,18 @@ app.get("/event/eventList", async (req, res) => {
 
   //Based on the state, return the event List dependent on the state of the list 
 
-  if (state != "UPCOMING" || state != "ONGOING" || state != "NEWEST") {
+  if (state !== "UPCOMING" && state !== "ONGOING" && state !== "NEWEST") {
     return res 
       .status(400)
       .json({success: false, message: "Invalid state of event list"}); 
   }
 
+
   try {
-    const eventList = eventList(state); 
-    return res.status(201).json({success: true, data})
+    //Finds the event based on state of the applicaiton 
+    const eventList = await eventListFind(state); 
+
+    return res.status(201).json({success: true, data: eventList}); 
   } catch (err) {
     return res 
       .status(400)
@@ -59,24 +62,34 @@ app.get("/event/eventList", async (req, res) => {
 
 })
 
-async function eventList(state) {
+async function eventListFind(state) {
   let eventList; 
 
   const currentDate = new Date(); 
-
   try {
-    if (state == "UPCOMING") {
+    if (state === "UPCOMING") {
       //Sorts the event List by dates of events that are greater than the current date
       //Sorted in ascending order 
       eventList = await Event.find({ date: { $gte: currentDate} }).sort({ date: 1});
-    } else if (state == "ONGOING") {
+    } else if (state === "ONGOING") {
       //Comment: Will we have a start time and end time ??? 
       //Currently it will return the events hapening today 
-      eventList = await Event.find({ date: { currentDate }}).sort({date: 1}); 
-    } else if (state == "NEWEST") {
+      eventList = await Event.find({   
+        date: { 
+          $gte: new Date(currentDate.setHours(0, 0, 0, 0)),
+          $lte: new Date(currentDate.setHours(23, 59, 59, 999))
+        }
+      }).sort({date: 1}); 
+
+    } else if (state === "NEWEST") {
       //Sorts the event List by created time and in descending order 
-      eventList = await Event.find().sort({createdAt: -1}); 
+      eventList = await Event.find().sort({createdAt: 1}); 
     }
+
+    // if (!eventList || eventList.length === 0) {
+    //   eventList = []
+    //   throw new Error('No events going on right now')
+    // }
 
     return eventList; 
   } catch (error) {

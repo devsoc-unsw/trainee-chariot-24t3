@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import arcLogo from "../assets/arcLogo.jpg";
 import climateExpo from "../assets/climateExpo.jpg";
 
@@ -8,26 +8,45 @@ const pictures = {
   climateExpo: climateExpo, 
 };
 
+const stateMap = {
+  1: "UPCOMING",
+  2: "ONGOING",
+  3: "NEWEST"
+};
+
 const characterLimit = 100; 
 
 function EventList() {
   const [activeButton, setActiveButton] = useState(1);
-
+  const [events, setEvents] = useState([]); 
+  const [error, setError] = useState(null); 
+   
   const handleActiveButtonChange = (buttonIndex) => {
     setActiveButton(buttonIndex);
   };
 
+  useEffect(() => {
+    fetchEvents(stateMap[activeButton])
+    console.log(stateMap[activeButton])
+  }, [activeButton]) 
 
-  // const getContent = () => {
-  //   switch (activeButton) {
-  //     case 1:
-  //       return <EventDetails/>;
-  //     case 2:
-  //       return "--------- No Ongoing Events :( ---------";
-  //     case 3:
-  //       return "--------- No New Events :( ---------";
-  //   }
-  // }
+  const fetchEvents = async (state) => {
+    try {
+      const response = await fetch(`http://localhost:5050/event/eventList?state=${state}`  );
+
+      if (!response.ok) {
+        console.log(response.json().message)
+        throw new Error(`Could not fetch the events`);
+      }
+
+      const responseData = await response.json(); 
+
+      setEvents(responseData.data); 
+    } catch (error) {
+      console.log(error.message)
+      setError(error.message)
+    }
+  }
 
   return (
     <div className="bg-[#FFF8D3] min-h-screen shadow-inner pl-10 pr-10 ">
@@ -43,8 +62,7 @@ function EventList() {
         <div className='flex-grow'>
           <div className='text-3xl'>
             <div className='flex flex-col gap-6'> 
-              {/* {getContent()} */}
-              <EventDetails 
+              {/* <EventDetails 
                 picture = "arcLogo" 
                 title = "DevSoc Pizza Party" 
                 location = "Laws 103, 8am - 2pm Fri, May 9, 2025 - May 11, 2025"
@@ -67,31 +85,18 @@ function EventList() {
                 title = "Futures Expo Series" 
                 location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
                 body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
-              />
-              <EventDetails 
-                picture = "climateExpo" 
-                title = "Futures Expo Series" 
-                location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
-                body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
-              />
-              <EventDetails 
-                picture = "climateExpo" 
-                title = "Futures Expo Series" 
-                location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
-                body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
-              />
-              <EventDetails 
-                picture = "climateExpo" 
-                title = "Futures Expo Series" 
-                location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
-                body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
-              />
-              <EventDetails 
-                picture = "climateExpo" 
-                title = "Futures Expo Series" 
-                location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
-                body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
-              />
+              /> */}
+              {
+                events.map((event) => (
+                  <EventDetails
+                    key = {event._id}
+                    picture = {event.picture}
+                    title = {event.title} 
+                    location = {event.location}
+                    body = {truncateText(event.body)}
+                  />
+                ))
+              }
             </div>
           </div>
         </div>
@@ -170,6 +175,8 @@ const Button = ({ label, type = 'button', variant = 'primary', onClick }) => {
 };
 
 function EventDetails({picture, title, location, body}) {
+  console.log(title)
+
   const getPicture = (picture) => {
     return pictures[picture] || arcLogo; 
   };
@@ -251,6 +258,10 @@ function EventItem({title, body}) {
 }
 
 function truncateText(text) {
+  if (!text) {
+    return "NO TEXT PROVIDED"; 
+  }
+
   if (text.length > characterLimit) {
     return text.slice(0, characterLimit) + "...";
   }

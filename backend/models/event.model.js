@@ -10,6 +10,18 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    picture: {
+      type: String, 
+      required: false, 
+    }, 
+    location: {
+      type: String, 
+      required: true, 
+    }, 
+    body: {
+      type: String, 
+      required: true, 
+    }, 
   },
   { timestamps: true } // mongoose will store createdAt and updatedAt everytime
 );
