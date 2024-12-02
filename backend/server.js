@@ -21,7 +21,7 @@ app.use(express.json());
 app.post("/event/create", async (req, res) => {
   const event = req.body;
 
-  if (!event.title || !event.date) {
+  if (!event.name || !event.date || !event.time || !event.location) {
     return res
       .status(400)
       .json({ success: false, message: "Please provide all values" });
@@ -117,6 +117,21 @@ app.get("/event/getInfo", async (req, res) => {
   }
 
 })
+
+
+app.delete("/events/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const event = await Event.findByIdAndDelete(id);
+    if (!event) {
+      return res.status(404).json({ success: false, message: "Server not found" });
+    }
+    return res.status(201).json({ success: true, message: "Event successfully deleted" });
+  } catch (err) {
+    console.error("Error deleting event", err.message);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+});  
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
