@@ -44,7 +44,7 @@ app.get("/event/eventList", async (req, res) => {
 
   if (state !== "UPCOMING" && state !== "ONGOING" && state !== "NEWEST") {
     return res 
-      .status(400)
+      .status(401)
       .json({success: false, message: "Invalid state of event list"}); 
   }
 
@@ -63,14 +63,15 @@ app.get("/event/eventList", async (req, res) => {
 })
 
 async function eventListFind(state) {
-  let eventList; 
+  let eventList = []; 
 
   const currentDate = new Date(); 
+  console.log(currentDate); 
   try {
     if (state === "UPCOMING") {
       //Sorts the event List by dates of events that are greater than the current date
       //Sorted in ascending order 
-      eventList = await Event.find({ date: { $gte: currentDate} }).sort({ date: 1});
+      eventList = await Event.find({$expr: { date: { $gte: ISODate(currentDate)}} }).sort({ date: 1});
     } else if (state === "ONGOING") {
       //Comment: Will we have a start time and end time ??? 
       //Currently it will return the events hapening today 
