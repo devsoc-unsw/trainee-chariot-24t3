@@ -40,7 +40,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MapPage />} />
         <Route path="/eventList" element={<EventList />} />
-        <Route path="/eventPage" element={<EventPage />} />
+        <Route path="/event/:id" element={<EventPage />} />
         <Route path="/dummy" element={<Dummy />} />
       </Routes>
     </>

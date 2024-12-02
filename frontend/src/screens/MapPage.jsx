@@ -1,6 +1,5 @@
 'use client'
 
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react"
 import * as React from "react"
 import Box from "@mui/material/Box"
@@ -107,7 +106,7 @@ function useMazeMap(setEventLocation) {
 
 function AnchorTemporaryDrawer() {
   const navigate = useNavigate()
-  
+
   const [state, setState] = useState({
     left: false,
   })
@@ -287,3 +286,4 @@ export default function MapPage() {
     </div>
   )
 }
+

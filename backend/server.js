@@ -66,12 +66,15 @@ async function eventListFind(state) {
   let eventList = []; 
 
   const currentDate = new Date(); 
-  console.log(currentDate); 
+  console.log(currentDate);
+  console.log(currentDate.setHours(0, 0, 0, 0));
+  console.log(currentDate.setHours(23, 59, 59, 999));
   try {
     if (state === "UPCOMING") {
       //Sorts the event List by dates of events that are greater than the current date
       //Sorted in ascending order 
-      eventList = await Event.find({$expr: { date: { $gte: ISODate(currentDate)}} }).sort({ date: 1});
+      ; 
+      eventList = await Event.find({ date: { $gte: currentDate }}).sort({ date: 1});
     } else if (state === "ONGOING") {
       //Comment: Will we have a start time and end time ??? 
       //Currently it will return the events hapening today 
@@ -98,8 +101,8 @@ async function eventListFind(state) {
   }
 }
 
-app.get("/event/getInfo", async (req, res) => {
-  const eventId = req.query.eventId; 
+app.get("/event/:id", async (req, res) => {
+  const eventId = req.params.id; 
   
   if (!eventId) {
     //No eventId given
@@ -119,8 +122,9 @@ app.get("/event/getInfo", async (req, res) => {
 })
 
 
-app.delete("/events/:id", async (req, res) => {
-  const { id } = req.params;
+app.delete("/event/:id", async (req, res) => {
+  const id = req.params.id;
+
   try {
     const event = await Event.findByIdAndDelete(id);
     if (!event) {

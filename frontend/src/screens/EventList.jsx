@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import arcLogo from "../assets/arcLogo.jpg";
 import climateExpo from "../assets/climateExpo.jpg";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 const PORT = 5050;
 
@@ -16,12 +17,11 @@ const stateMap = {
   3: "NEWEST"
 };
 
-const characterLimit = 100; 
+const characterLimit = 100;  
 
-function EventList() {
+export default function EventList() {
   const [activeButton, setActiveButton] = useState(1);
   const [events, setEvents] = useState([]); 
-  const [error, setError] = useState(null); 
    
   const handleActiveButtonChange = (buttonIndex) => {
     setActiveButton(buttonIndex);
@@ -34,7 +34,7 @@ function EventList() {
 
   const fetchEvents = async (state) => {
     try {
-      const response = await fetch(`http://localhost:5050/event/eventList?state=${state}`  );
+      const response = await fetch(`http://localhost:5050/event/eventList?state=${state}`);
 
       if (!response.ok) {
         console.log(response.json().message)
@@ -46,7 +46,6 @@ function EventList() {
       setEvents(responseData.data); 
     } catch (error) {
       console.log(error.message)
-      setError(error.message)
     }
   }
 
@@ -62,44 +61,17 @@ function EventList() {
           </div>
         </div>
         <div className='flex-grow'>
-          <div className='text-3xl'>
-            <div className='flex flex-col gap-6'> 
-              {/* <EventDetails 
-                picture = "arcLogo" 
-                title = "DevSoc Pizza Party" 
-                location = "Laws 103, 8am - 2pm Fri, May 9, 2025 - May 11, 2025"
-                body = {truncateText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore e...")}
-                button = {deleteButton()}
-              />
-              <EventDetails 
-                picture = "climateExpo" 
-                title = "Futures Expo Series" 
-                location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
-                body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
-                button = {deleteButton()}
-              />
-              <EventDetails 
-                picture = "climateExpo" 
-                title = "Futures Expo Series" 
-                location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
-                body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
-                button = {deleteButton()}
-              />
-              <EventDetails 
-                picture = "climateExpo" 
-                title = "Futures Expo Series" 
-                location = "Roundhouse UNSW, 3:30pm - 6:30pm 29 May"
-                body = {truncateText("UNSW is hosting a series of events in 2024 that showcase translational research aligned with the National Reconstruction Fund's (NRF) priority areas. The NRF was announced in late 2022 as a $15 billion investment to fund projects that diversify and transform Australia’s economy in targeted areas. The Futures Expo Series is a platform for businesses, investors and government to network and explore collaboration opportunities with UNSW's leading innovation community.")}
-              /> */}
+          <div className='text-3xl pb-16'>
+            <div className='flex flex-col gap-8'> 
               {
                 events.map((event) => (
                   <EventDetails
                     key = {event._id}
+                    id = {event._id} 
                     picture = {event.picture}
-                    title = {event.title} 
-                    location = {event.location}
-                    body = {truncateText(event.body)}
-                    button = {deleteButton()}
+                    title = {event.name} 
+                    location = {makeDate(event.date) +" " + event.location.building + event.location.room}
+                    body = {truncateText(event.body)} 
                   />
                 ))
               }
@@ -155,6 +127,7 @@ function NavigationList({ onActiveButtonChange }) {
           <Button
           label="+ Add Event"
           variant={'eventAdd'}
+          onClick = {() => handleSubmitEvent()}
           />
         </div>
     </div>
@@ -180,24 +153,29 @@ const Button = ({ label, type = 'button', variant = 'primary', onClick }) => {
   );
 };
 
-function EventDetails({picture, title, location, body, button}) {
+function EventDetails({id, picture, title, location, body}) {
+  const navigate = useNavigate(); 
 
   console.log(title)
   const getPicture = (picture) => {
     return pictures[picture] || arcLogo; 
   };
 
+  const openEventPage = () => {
+    navigate(`/event/${id}`)
+  }; 
+
   return (
-    <div className="bg-[#EFD780] p-4 rounded-[30px] flex gap-8">
+    <div className="bg-[#EFD780] p-4 rounded-[30px] flex gap-8"
+    onClick = { openEventPage }>
+      
       <div className='w-80 h-60 flex-shrink-0'> 
         <img
           src= {getPicture(picture)}
           alt="Event picture"
           className="w-full h-full object-cover  rounded-[30px]"
         />
-        <div className="p-6 items-center">
-          {button}
-        </div>
+
       </div>
       
       <div className="flex flex-col text-left">
@@ -213,6 +191,11 @@ function EventDetails({picture, title, location, body, button}) {
           <br />
           <div> 
             {body}
+          </div>
+          <div className='flex justify-end'>
+            <DeleteButton
+            id = {id}
+            />
           </div>
         </div>
       </div>
@@ -277,14 +260,30 @@ function truncateText(text) {
   return text;
 }
 
-function deleteButton(id) {
+function makeDate(date) {
+  if (!date) {
+    return "NO DATE PROVIDED"; 
+  }
+
+  if (date.length > 10) {
+    return date.slice(0, 10);
+  }
+
+  return date;
+}
+
+function DeleteButton({id}) {
+
+
   const deleteEvent = async (e) => {
     e.preventDefault();
     try {
-      await axios.delete(`http://localhost:${PORT}/api/events/${id}`, {
+      console.log("the id is: " + id); 
+      await axios.delete(`http://localhost:${PORT}/event/${id}`, {
         
       });
       console.log("Event deleted successfully");
+      location.reload();
     } catch (err) {
       console.error(err);
     }
@@ -293,7 +292,7 @@ function deleteButton(id) {
   return (
     <div className="justify-center flex items-center">
       <button
-        className=" flex w-96 gap-2 p-5 bg-[#FF9980] z-10 rounded-[30px] justify-center items-center text-2xl"
+        className=" flex w-80 h-14 gap-2 p-5 bg-[#FF9980] z-10 rounded-[30px] justify-center items-center text-2xl"
         onClick = {deleteEvent}
       >
         Delete Event
@@ -301,5 +300,3 @@ function deleteButton(id) {
     </div>
   );
 }
-
-export default EventList;
