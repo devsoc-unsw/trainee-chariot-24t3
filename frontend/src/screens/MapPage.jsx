@@ -147,11 +147,14 @@ const handleSubmitEvent = async () => {
     return;
   }
 
+  const token = localStorage.getItem("token")  
+
   const eventData = {
     name: eventName,
     date: eventDate,
     time: eventTime,
     location: eventLocation,
+    token: token, 
   };
 
   try {

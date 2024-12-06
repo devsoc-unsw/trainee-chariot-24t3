@@ -6,34 +6,40 @@ import EventList from "./screens/EventList";
 import EventPage from "./screens/EventPage";
 import Dummy from "./screens/Dummy";
 import LostOnCampusLogo from "./assets/locLogo.png";
+import * as crypto from "node:crypto";
 import "./App.css";
 
 function App() {
+  if (!localStorage.token) {
+    //User has visited site for the first time 
+    localStorage.token = makeid(20)
+  } 
+
   const navigate = useNavigate();
   return (
     <>
-      <div className="flex cursor-pointer bg-[#FFA438] h-20 justify-between text-4xl pl-10 pr-10 items-center">
-        <div className="flex gap-4 items-center">
+      <div className="flex bg-[#FFA438] h-20 justify-between text-4xl pl-10 pr-10 items-center">
+        <div className="flex gap-4 items-center cursor-pointer ">
           <img src={LostOnCampusLogo} alt="LostOnCampus Logo"></img>
           <p>
             Bored<a className="text-yellow-300	">On</a>Campus
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 cursor-pointer ">
           <a
             onClick={() => navigate("/eventList")}
-            className="flex p-2 items-center gap-2"
+            className="flex p-2 items-center gap-2 hover:underline"
           >
             {" "}
             <CalendarMonthIcon sx={{ fontSize: 48 }} /> Events
           </a>
           <a
             onClick={() => navigate("/")}
-            className="p-2 flex items-center gap-2"
+            className="p-2 flex items-center gap-2 hover:underline"
           >
             <MapIcon sx={{ fontSize: 48 }} /> View Events On Map
           </a>
-          <a onClick={() => navigate("/dummy")}>Dummy</a>
+          {/* <a onClick={() => navigate("/dummy")}>Dummy</a> */}
         </div>
       </div>
 
@@ -46,5 +52,18 @@ function App() {
     </>
   );
 }
+
+function makeid(length) {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+}
+
 
 export default App;

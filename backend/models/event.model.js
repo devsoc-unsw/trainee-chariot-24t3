@@ -9,7 +9,8 @@ const eventSchema = new mongoose.Schema(
       coords: {type: Number, type: Number}, 
       building: { type: String },
       room: { type: String }
-    }
+    }, 
+    token: { type: String, required: true }
   },
   { timestamps: true } // mongoose will store createdAt and updatedAt everytime
 );

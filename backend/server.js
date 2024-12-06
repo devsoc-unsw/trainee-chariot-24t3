@@ -39,10 +39,11 @@ app.post("/event/create", async (req, res) => {
 
 app.get("/event/eventList", async (req, res) => {
   const state = req.query.state; 
+  const token = req.query.token; 
 
   //Based on the state, return the event List dependent on the state of the list 
 
-  if (state !== "UPCOMING" && state !== "ONGOING" && state !== "NEWEST") {
+  if (state !== "UPCOMING" && state !== "ONGOING" && state !== "NEWEST" && state !== "MYEVENTS") {
     return res 
       .status(401)
       .json({success: false, message: "Invalid state of event list"}); 
@@ -51,7 +52,7 @@ app.get("/event/eventList", async (req, res) => {
 
   try {
     //Finds the event based on state of the applicaiton 
-    const eventList = await eventListFind(state); 
+    const eventList = await eventListFind(state, token); 
 
     return res.status(201).json({success: true, data: eventList}); 
   } catch (err) {
@@ -62,7 +63,7 @@ app.get("/event/eventList", async (req, res) => {
 
 })
 
-async function eventListFind(state) {
+async function eventListFind(state, token) {
   let eventList = []; 
 
   const currentDate = new Date(); 
@@ -88,6 +89,11 @@ async function eventListFind(state) {
     } else if (state === "NEWEST") {
       //Sorts the event List by created time and in descending order 
       eventList = await Event.find().sort({createdAt: 1}); 
+    } else if (state === "MYEVENTS") {
+      console.log("hello");
+      console.log(token.toString()); 
+      //Finds all events by the user with the token 
+      eventList = await Event.find({ token: token }); 
     }
 
     // if (!eventList || eventList.length === 0) {
