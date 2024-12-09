@@ -148,7 +148,6 @@ const handleSubmitEvent = async () => {
   }
 
   const token = localStorage.getItem("token")  
-
   const eventData = {
     name: eventName,
     date: eventDate,

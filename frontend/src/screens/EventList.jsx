@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import arcLogo from "../assets/arcLogo.jpg";
 import climateExpo from "../assets/climateExpo.jpg";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
+import { useFetcher, useNavigate } from 'react-router-dom';
+
+import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
+import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded'; 
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const PORT = 5050;
 
@@ -24,18 +31,29 @@ const sideCharLimit = 30;
 export default function EventList() {
   const [activeButton, setActiveButton] = useState(1);
   const [events, setEvents] = useState([]); 
-   
+  const [bookmarked, setBookMarked] = useState([]); 
+  
+
   const handleActiveButtonChange = (buttonIndex) => {
     setActiveButton(buttonIndex);
   };
 
   useEffect(() => {
     fetchEvents(stateMap[activeButton])
-    console.log(stateMap[activeButton])
+   
   }, [activeButton]) 
 
-  
+  //Get all bookmarked events once at the initalisation 
+  useEffect(() => {
+    const storedEvents = JSON.parse(localStorage.getItem("bookMarkedEvents"));
 
+    if (!storedEvents) {
+      setBookMarked([]);
+    } else {
+      setBookMarked(storedEvents); 
+    }
+  }, [])
+  
   const fetchEvents = async (state) => {
     try {
       const token = localStorage.getItem("token")
@@ -53,6 +71,8 @@ export default function EventList() {
       console.log(error.message)
     }
   }
+
+
 
   return (
     <div className="bg-[#FFF8D3] min-h-screen shadow-inner pl-10 pr-10 ">
@@ -75,8 +95,14 @@ export default function EventList() {
                     id = {event._id} 
                     picture = {event.picture}
                     title = {event.name} 
-                    location = {makeDate(event.date) +" " + event.location.building + event.location.room}
-                    body = {truncateText(event.body)} 
+                    location = {makeDate(event.date) + " | " + event.location.building.replace(/<[^>]*>/g, '') + event.location.room.replace(/<[^>]*>/g, '')}
+                    body = {truncateText(event.body)}
+                    time = {new Date(event.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} 
+                    events = {events}
+                    setEvents = {setEvents}
+                    owner = {event.token}
+                    bookmarked = {bookmarked} 
+                    setBookMarked = {setBookMarked}
                   />
                 ))
               }
@@ -85,7 +111,9 @@ export default function EventList() {
         </div>
         <div className=' justify-center'>
           <div className='flex flex-col gap-4'>
-            <SavedEvents/>
+            <SavedEvents
+              bookmarked = {bookmarked}
+            />
             <RecentlyViewed />
           </div>
         </div>
@@ -169,7 +197,7 @@ const Button = ({ label, type = 'button', variant = 'primary', onClick }) => {
   );
 };
 
-function EventDetails({id, picture, title, location, body}) {
+function EventDetails({id, picture, title, location, body, time, events, setEvents, owner, bookmarked, setBookMarked}) {
   const [ownEvent, setownEvent] = useState(false); 
 
   const navigate = useNavigate(); 
@@ -196,34 +224,16 @@ function EventDetails({id, picture, title, location, body}) {
     localStorage.setItem("recentlyViewedEvents", JSON.stringify(recentlyViewedEvents))
   }; 
   
+
   useEffect(() => {
     //Find all events owned by the user, if the event id matches an event owned by the user
     //Then user will have option to delete or edit the event 
-    const fetchEvents = async () => {
-      try {
-        const token = localStorage.getItem("token")
-        const response = await fetch(`http://localhost:5050/event/eventList?state=MYEVENTS&token=${token}`);
-  
-        if (!response.ok) {
-          console.log(response.json().message)
-          throw new Error(`Could not fetch the events`);
-        }
-        
-        const eventList = await response.json(); 
-        console.log(eventList.data)
-        console.log(id)
-        for (const someEvent of eventList.data) {
-          if (someEvent._id === id) {
-            setownEvent(true);
-          }
-        }
-      } catch (error) {
-        console.log(error.message)
-      }
+    
+    const token = localStorage.getItem("token")
+    if (token === owner) {
+      setownEvent(true); 
     }
-
-    fetchEvents()
-  }, [id])
+  }, [])
 
   return (
     <div className="bg-[#EFD780] p-4 rounded-[30px] flex gap-8 hover:shadow-lg shadow-md">
@@ -245,9 +255,9 @@ function EventDetails({id, picture, title, location, body}) {
               {title}
             </h1> 
           </div>
-          <div className='flex text-2xl flex-col'>
-            <div>
-              {location}
+          <div className='flex text-2xl flex-col '>
+            <div className='flex items-center'>
+              <AccessTimeIcon/> {time} | <DateRangeIcon/>{location} 
             </div>
             <br />
             <div> 
@@ -259,6 +269,8 @@ function EventDetails({id, picture, title, location, body}) {
         <div className='flex justify-between gap-4'>
           <BookMarkButton
             id = {id}
+            bookmarked = {bookmarked} 
+            setBookMarked = {setBookMarked}
           />
             
           {ownEvent === true &&(<EditButton
@@ -267,6 +279,8 @@ function EventDetails({id, picture, title, location, body}) {
           
           {ownEvent === true &&(<DeleteButton
           id = {id}
+          events = {events}
+          setEvents = {setEvents} 
           />)}
         </div>
       </div>
@@ -276,12 +290,7 @@ function EventDetails({id, picture, title, location, body}) {
 }
 
 
-function SavedEvents() {
-  if (!localStorage.bookMarkedEvents) {
-    var bookMarkedEvents = [];
-  } else {
-    var bookMarkedEvents = JSON.parse(localStorage.bookMarkedEvents); 
-  }
+function SavedEvents({bookmarked}) {
 
   return (
     <div className="bg-[#D9D9D9] p-5 rounded-[30px] flex gap-4 min-h-40 min-w-[440px] flex flex-col text-start  border-4">
@@ -289,12 +298,12 @@ function SavedEvents() {
         Saved Events
       </div>
       <div className='flex flex-col gap-4'>
-        {bookMarkedEvents.map((eventid) => (
+        {bookmarked.map((eventid) => (
           <EventItem
             eventId = {eventid}
           />
         ))}
-        {bookMarkedEvents.length === 0 && (
+        {bookmarked.length === 0 && (
           <div className="text-2xl text-gray-500 text-center p-4 italic ">
             No Saved Events
           </div>
@@ -305,12 +314,26 @@ function SavedEvents() {
 }
 
 function RecentlyViewed() {
+  const [deleteEvent, setDeleteEvent] = useState(false); 
+
   if (!localStorage.recentlyViewedEvents) {
     //RecentlyViewed Events is not initalised
     var recentlyViewedEvents = []; 
   } else {
     var recentlyViewedEvents = JSON.parse(localStorage.recentlyViewedEvents);
   } 
+
+  const clearHistory = () => {
+    localStorage.recentlyViewedEvents = JSON.stringify([]); 
+  }
+
+  useEffect(() => {
+    if (deleteEvent == true) {
+      clearHistory();
+    }
+
+    setDeleteEvent(false) 
+  }, [deleteEvent])
 
   return (
     <div className="bg-[#D9D9D9] p-5 rounded-[30px] flex gap-4 min-h-40 min-w-[440px] flex flex-col text-start  border-4">
@@ -323,6 +346,12 @@ function RecentlyViewed() {
             eventId = {eventid} 
           />
         ))}
+        {recentlyViewedEvents.length !== 0 && (
+          <div className="text-2xl text-white-500 text-center p-4 mouse-pointer cursor-pointer hover:underline"
+          onClick = {() => setDeleteEvent(true)} >
+            Clear History
+          </div>
+        )}
         {recentlyViewedEvents.length === 0 && (
           <div className="text-2xl text-gray-500 text-center p-4 italic ">
             No Recently Viewed Events 
@@ -336,6 +365,8 @@ function RecentlyViewed() {
 
 function EventItem({ eventId }) {
   const [event, setEvent] = useState([]); 
+  const [day, setDay] = useState([""]);
+
   const navigate = useNavigate(); 
 
   useEffect(() => {
@@ -354,7 +385,11 @@ function EventItem({ eventId }) {
       const responseData = await response.json(); 
 
       setEvent(responseData.data); 
-      console.log("REEEEEEEEEE" + responseData.data); 
+
+      const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+      const date = new Date(responseData.data.time); 
+      setDay(weekday[date.getDay()])  
+
     } catch (error) {
       console.log(error.message)
     }
@@ -364,14 +399,15 @@ function EventItem({ eventId }) {
     navigate(`/event/${eventId}`)
   }; 
 
+
   return (
-    <div className='bg-[#EFD780] min-h-16 rounded-[10px] min-w-[400px]	flex flex-col p-2 cursor-pointer hover:bg-[#E5C453]'
+    <div className='bg-[#EFD780] min-h-16 rounded-[10px]	flex flex-col p-2 cursor-pointer hover:bg-[#E5C453]'
     onClick = { openEventPage }>
       <div className='font-medium	text-2xl	'>
         {truncateText(event.name, sideCharLimit)}
       </div>
       <div>
-        {event.date}
+      {new Date(event.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} {day} | {makeDate(event.date)}
       </div>
     </div>
   );
@@ -404,7 +440,7 @@ function makeDate(date) {
   return date;
 }
 
-function DeleteButton({id}) {
+function DeleteButton({id, events, setEvents}) {
   if (!localStorage.recentlyViewedEvents) {
     var recentlyViewedEvents = []; 
   } else {
@@ -431,8 +467,9 @@ function DeleteButton({id}) {
 
       localStorage.bookMarkedEvents = JSON.stringify(bookMarkedEvents);
       localStorage.recentlyViewedEvents = JSON.stringify(recentlyViewedEvents);
+      
+      setEvents(events.filter(event => event._id !== id)); 
 
-      location.reload();
     } catch (err) {
       console.error(err);
     }
@@ -445,7 +482,7 @@ function DeleteButton({id}) {
         className=" flex w-full h-14 gap-2 p-5 bg-[#FF9980] hover:bg-[#FF8066] z-10 rounded-[20px] justify-center items-center text-2xl pointer-events-auto"
         onClick = {deleteEvent}
       >
-        Delete Event
+        <DeleteIcon/> Delete Event
       </button>
     </div>
   );
@@ -459,48 +496,38 @@ function EditButton({id}) {
         className=" flex w-full h-14 gap-2 p-5 bg-[#FFB800] hover:bg-[#E6A800] z-10 rounded-[20px] justify-center items-center text-2xl pointer-events-auto"
         // onClick = {deleteEvent}
       >
-        Edit Event 
+        <EditIcon/>Edit Event 
       </button>
     </div>
   );
 }
 
-function BookMarkButton({id}) {
+function BookMarkButton({id, bookmarked, setBookMarked}) {
   const [booked, setBooked] = useState(false); 
 
-  if (!localStorage.recentlyViewedEvents) {
-    var recentlyViewedEvents = []; 
-  } else {
-    var recentlyViewedEvents = JSON.parse(localStorage.recentlyViewedEvents); 
-  }
-
-  if (!localStorage.bookMarkedEvents) {
-    var bookMarkedEvents = [];
-  } else {
-    var bookMarkedEvents = JSON.parse(localStorage.bookMarkedEvents); 
-  }
-
-
   useEffect(() => {    
-    if (bookMarkedEvents.includes(id)) {
+    if (bookmarked.includes(id)) {
       setBooked(true); 
     }  
-  }, [id])
+  }, [id, bookmarked])
 
 
   const bookMarkEvent = () => {
-    if (!bookMarkedEvents.includes(id)) {
+    let newBookmarked = []; 
+
+    if (!bookmarked.includes(id)) {
+      newBookmarked = [id, ...bookmarked];
       setBooked(true)
-      bookMarkedEvents.unshift(id); 
     } else {
       //Already included bookmark
       //So we must delete the bookmark 
+      newBookmarked = bookmarked.filter(eventId => eventId !== id); 
+
       setBooked(false);  
-      bookMarkedEvents = bookMarkedEvents.filter(eventId => eventId !== id); 
     }
 
-    location.reload()
-    localStorage.setItem("bookMarkedEvents", JSON.stringify(bookMarkedEvents))
+    setBookMarked(newBookmarked)
+    localStorage.setItem("bookMarkedEvents", JSON.stringify(newBookmarked))
   }; 
 
   return (
@@ -510,13 +537,13 @@ function BookMarkButton({id}) {
         onClick = {bookMarkEvent}
       > 
         {booked === false && (
-          <div>
-            Bookmark Event
+          <div className='flex items-center'>
+            <BookmarkAddIcon/> &nbsp;Bookmark
           </div>
         )}
         {booked === true && (
-          <div>
-            Bookmarked
+          <div className='flex items-center'>
+            <BookmarkAddedIcon/> &nbsp;Bookmarked
           </div>
         )}
          
