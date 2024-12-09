@@ -116,6 +116,7 @@ function AnchorTemporaryDrawer() {
   const [eventDate, setEventDate] = useState(null)
   const [eventTime, setEventTime] = useState(null)
   const [eventLocation, setEventLocation] = useState({ lat: null, lng: null, building: "", room: "" });
+  const [eventDesc, setEventDesc] = useState("")
 
   const { searchInputRef, suggestionsRef } = useMazeMap(setEventLocation);
 
@@ -137,6 +138,7 @@ function AnchorTemporaryDrawer() {
     setEventDate(null)
     setEventTime(null)
     setEventLocation("")
+    setEventDesc("")
   }
 
 const handleSubmitEvent = async () => {
@@ -151,6 +153,7 @@ const handleSubmitEvent = async () => {
     date: eventDate,
     time: eventTime,
     location: eventLocation,
+    desc: eventDesc,
   };
 
   try {
@@ -261,6 +264,16 @@ const handleSubmitEvent = async () => {
               />
               <div ref={suggestionsRef} id="suggestions" className="search-suggestions default"></div>
             </div>
+            <TextField
+              id="outlined-multiline-static"
+              multiline
+              rows={4}
+              fullWidth
+              label="Event Description"
+              value={eventDesc}
+              onChange={(e) => setEventDesc(e.target.value)}
+              autoComplete="off"
+            />
           </div>
         </DialogContent>
         <DialogActions style={{ backgroundColor: '#CFCFCF' }}>
