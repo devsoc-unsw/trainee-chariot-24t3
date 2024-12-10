@@ -106,6 +106,7 @@ function useMazeMap(setEventLocation) {
 
 function AnchorTemporaryDrawer() {
   const navigate = useNavigate()
+
   const [state, setState] = useState({
     left: false,
   })
@@ -152,12 +153,14 @@ const handleSubmitEvent = async () => {
     return;
   }
 
+  const token = localStorage.getItem("token")  
   const eventData = {
     name: eventName,
     date: eventDate,
     startTime: eventStart,
     endTime: eventEnd,
     location: eventLocation,
+    token: token, 
     desc: eventDesc,
     imageUrl: thumbnailUrl,
   };
@@ -184,6 +187,7 @@ const handleSubmitEvent = async () => {
   }
 };
 
+
   const menuItems = [
     { text: "", icon: <CloseIcon />, action: toggleDrawer('left', false) },
     { text: "Create New Event", icon: <PlaceIcon />, action: handleCreateEvent },
@@ -192,7 +196,9 @@ const handleSubmitEvent = async () => {
     { text: "Event List", icon: <ListAltIcon />, action: () => {navigate('/eventList')} },
   ]
 
+
   const list = (anchor) => (
+
     <Box
       sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 300 }}
       role="presentation"
@@ -314,3 +320,4 @@ export default function MapPage() {
     </div>
   )
 }
+

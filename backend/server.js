@@ -38,8 +38,100 @@ app.post("/event/create", async (req, res) => {
   }
 });
 
-app.delete("/events/:id", async (req, res) => {
-  const { id } = req.params;
+app.get("/event/eventList", async (req, res) => {
+  const state = req.query.state; 
+  const token = req.query.token; 
+
+  //Based on the state, return the event List dependent on the state of the list 
+
+  if (state !== "UPCOMING" && state !== "ONGOING" && state !== "NEWEST" && state !== "MYEVENTS") {
+    return res 
+      .status(401)
+      .json({success: false, message: "Invalid state of event list"}); 
+  }
+
+
+  try {
+    //Finds the event based on state of the applicaiton 
+    const eventList = await eventListFind(state, token); 
+
+    return res.status(201).json({success: true, data: eventList}); 
+  } catch (err) {
+    return res 
+      .status(400)
+      .json({success: false, message: "Unable to retrieve event list"}); 
+  }
+
+})
+
+async function eventListFind(state, token) {
+  let eventList = []; 
+
+  const currentDate = new Date(); 
+  console.log(currentDate);
+  console.log(currentDate.setHours(0, 0, 0, 0));
+  console.log(currentDate.setHours(23, 59, 59, 999));
+  try {
+    if (state === "UPCOMING") {
+      //Sorts the event List by dates of events that are greater than the current date
+      //Sorted in ascending order 
+      ; 
+      eventList = await Event.find({ date: { $gte: currentDate }}).sort({ date: 1});
+    } else if (state === "ONGOING") {
+      //Comment: Will we have a start time and end time ??? 
+      //Currently it will return the events hapening today 
+      eventList = await Event.find({   
+        date: { 
+          $gte: new Date(currentDate.setHours(0, 0, 0, 0)),
+          $lte: new Date(currentDate.setHours(23, 59, 59, 999))
+        }
+      }).sort({date: 1}); 
+
+    } else if (state === "NEWEST") {
+      //Sorts the event List by created time and in descending order 
+      eventList = await Event.find().sort({createdAt: 1}); 
+    } else if (state === "MYEVENTS") {
+      console.log("hello");
+      console.log(token.toString()); 
+      //Finds all events by the user with the token 
+      eventList = await Event.find({ token: token }); 
+    }
+
+    // if (!eventList || eventList.length === 0) {
+    //   eventList = []
+    //   throw new Error('No events going on right now')
+    // }
+
+    return eventList; 
+  } catch (error) {
+    throw new Error('Unable to get the event List');
+  }
+}
+
+app.get("/event/:id", async (req, res) => {
+  const eventId = req.params.id; 
+  
+  if (!eventId) {
+    //No eventId given
+    return res 
+      .status(400)
+      .json({success: false, message: "Please provide valid event Id"}); 
+  }
+
+  try {
+    const eventData = await Event.findById(eventId); 
+    return res.status(201).json({ success: true, data: eventData}); 
+  } catch(err) {
+    console.error("Error in getting the event data for event Id", eventId); 
+    return res.status (500).json({success: false, message: "Cannot get event data"})
+  }
+
+})
+
+
+app.delete("/event/:id", async (req, res) => {
+  const id = req.params.id;
+
   try {
     const event = await Event.findByIdAndDelete(id);
     if (!event) {

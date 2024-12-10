@@ -11,7 +11,8 @@ const eventSchema = new mongoose.Schema(
       lng: {type: Number}, 
       building: { type: String },
       room: { type: String }
-    },
+    }, 
+    token: { type: String, required: true },
     desc: {type: String},
     imageUrl: {type: String}, 
   },

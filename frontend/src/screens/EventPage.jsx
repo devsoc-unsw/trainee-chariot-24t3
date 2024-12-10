@@ -1,10 +1,43 @@
 import arcLogo from "../assets/arcLogo.jpg";
+import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 
 function EventPage() {
+  const [event, setEvent] = useState([]); 
+
+  const { id } = useParams(); 
+  window.scrollTo(0, 0);
+
+  useEffect(() => {
+    fetchInfo(id)
+  },[])
+
+  const fetchInfo = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5050/event/${id}`);
+      
+      if (!response.ok) {
+        console.log(response.json().message)
+        throw new Error(`Could not fetch the events`);
+      }
+
+      const responseData = await response.json(); 
+
+      setEvent(responseData.data); 
+      console.log(responseData.data); 
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
+
+  console.log(id); 
+
   return (
     <div>
       <div className="w-full h-screen bg-[#FCFDAF]">
-        <div className="font-bold text-3xl p-8">DevSoc Event</div>
+        <div className="font-bold text-3xl p-8">
+          {event.name}
+        </div>
         <div className="flex justify-center">
           <img
             src={arcLogo}
@@ -23,7 +56,6 @@ function EventPage() {
               <h2 className="text-3xl font-semibold text-white p-6">Where</h2>
               <p className="text-xl text-white">Law Building 163</p>
             </div>
-
             <div className="flex-1 p-4">
               <h2 className="text-3xl font-semibold text-white p-6">When</h2>
               <p className="text-xl text-white">4-6pm, Fri, May 9 2025</p>
