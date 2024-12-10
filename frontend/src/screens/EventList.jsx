@@ -302,6 +302,8 @@ function EventDetails({id, picture, title, location, body, time, events, setEven
           id = {id}
           events = {events}
           setEvents = {setEvents} 
+          bookmarked = {bookmarked} 
+          setBookMarked = {setBookMarked}
           />)}
         </div>
       </div>
@@ -460,7 +462,7 @@ function makeDate(date) {
   return date;
 }
 
-function DeleteButton({id, events, setEvents}) {
+function DeleteButton({id, events, setEvents, bookmarked, setBookMarked}) {
   if (!localStorage.recentlyViewedEvents) {
     var recentlyViewedEvents = []; 
   } else {
@@ -489,6 +491,8 @@ function DeleteButton({id, events, setEvents}) {
       localStorage.recentlyViewedEvents = JSON.stringify(recentlyViewedEvents);
       
       setEvents(events.filter(event => event._id !== id)); 
+
+      setBookMarked(bookmarked.filter(eventId => eventId !== id));
 
     } catch (err) {
       console.error(err);
