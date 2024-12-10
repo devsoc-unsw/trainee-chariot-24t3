@@ -89,7 +89,7 @@ async function eventListFind(state, token) {
 
     } else if (state === "NEWEST") {
       //Sorts the event List by created time and in descending order 
-      eventList = await Event.find().sort({createdAt: 1}); 
+      eventList = await Event.find().sort({createdAt: -1})
     } else if (state === "MYEVENTS") {
       console.log("hello");
       console.log(token.toString()); 
