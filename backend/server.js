@@ -21,7 +21,8 @@ app.use(express.json());
 app.post("/event/create", async (req, res) => {
   const event = req.body;
 
-  if (!event.name || !event.date || !event.time || !event.location) {
+  if (!event.name || !event.date || !event.startTime || !event.endTime || !event.location
+    || !event.desc) {
     return res
       .status(400)
       .json({ success: false, message: "Please provide all values" });

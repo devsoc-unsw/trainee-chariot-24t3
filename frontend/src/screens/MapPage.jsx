@@ -115,8 +115,11 @@ function AnchorTemporaryDrawer() {
 
   const [eventName, setEventName] = useState("")
   const [eventDate, setEventDate] = useState(null)
-  const [eventTime, setEventTime] = useState(null)
+  const [eventStart, setEventStart] = useState(null)
+  const [eventEnd, setEventEnd] = useState(null)
   const [eventLocation, setEventLocation] = useState({ lat: null, lng: null, building: "", room: "" });
+  const [eventDesc, setEventDesc] = useState("")
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
 
   const { searchInputRef, suggestionsRef } = useMazeMap(setEventLocation);
 
@@ -136,8 +139,11 @@ function AnchorTemporaryDrawer() {
     setOpenDialog(false)
     setEventName("")
     setEventDate(null)
-    setEventTime(null)
+    setEventStart(null)
+    setEventEnd(null)
     setEventLocation("")
+    setEventDesc("")
+    setThumbnailUrl("")
   }
 
 const handleSubmitEvent = async () => {
@@ -151,9 +157,12 @@ const handleSubmitEvent = async () => {
   const eventData = {
     name: eventName,
     date: eventDate,
-    time: eventTime,
+    startTime: eventStart,
+    endTime: eventEnd,
     location: eventLocation,
     token: token, 
+    desc: eventDesc,
+    imageUrl: thumbnailUrl,
   };
 
   try {
@@ -251,9 +260,15 @@ const handleSubmitEvent = async () => {
                 renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
               />
               <TimePicker
-                label="Event Time"
-                value={eventTime}
-                onChange={(newValue) => setEventTime(newValue)}
+                label="Event Start"
+                value={eventStart}
+                onChange={(newValue) => setEventStart(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              <TimePicker
+                label="Event End"
+                value={eventEnd}
+                onChange={(newValue) => setEventEnd(newValue)}
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
               </Box>
@@ -267,6 +282,23 @@ const handleSubmitEvent = async () => {
               />
               <div ref={suggestionsRef} id="suggestions" className="search-suggestions default"></div>
             </div>
+            <TextField
+              id="outlined-multiline-static"
+              multiline
+              rows={4}
+              fullWidth
+              label="Event Description"
+              value={eventDesc}
+              onChange={(e) => setEventDesc(e.target.value)}
+              autoComplete="off"
+            />
+            <TextField
+              fullWidth
+              label="Thumbnail URL"
+              value={thumbnailUrl}
+              onChange={(e) => setThumbnailUrl(e.target.value)}
+              autoComplete="off"
+            />
           </div>
         </DialogContent>
         <DialogActions style={{ backgroundColor: '#CFCFCF' }}>
