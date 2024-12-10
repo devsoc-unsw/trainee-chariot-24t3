@@ -52,6 +52,40 @@ function createMarker(map, poi, color) {
   });
 }
 
+function allOngoingEvents() {
+  const [allEvents, setAllEvents] = useState([]);
+
+  useEffect(() => {
+    //Gets all the events that exist at the start
+    const getAllEvents = async () => {
+      const data = await fetchEvents("ONGOING");
+      setAllEvents(data);
+    };
+
+    getAllEvents();
+  }, []);
+
+  const fetchEvents = async (state) => {
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`http://localhost:5050/event/eventList?state=${state}&token=${token}`);
+  
+      if (!response.ok) {
+        console.log(response.json().message)
+        throw new Error(`Could not fetch the events`);
+      }
+  
+      const responseData = await response.json(); 
+  
+      return responseData.data; 
+    } catch (error) {
+      console.log(error.message)
+    }
+  };
+
+  return allEvents;
+};
+
 function useMazeMap(setEventLocation) {
   const mapRef = useRef(null)
   const searchInputRef = useRef(null)
@@ -69,8 +103,17 @@ function useMazeMap(setEventLocation) {
       zLevel: 1,
     }
 
-    const map = new window.Mazemap.Map(mapOptions)
-    map.addControl(new window.Mazemap.mapboxgl.NavigationControl())
+    const map = new window.Mazemap.Map(mapOptions);
+    map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
+
+
+    // const allEvents = allOngoingEvents();
+
+    // for (const event of allEvents) {
+    //   console.log(event.name);
+    // }
+
+
     map.on('click', onMapClick);
 
     function onMapClick(e){
@@ -140,6 +183,7 @@ function useMazeMap(setEventLocation) {
 
 function AnchorTemporaryDrawer() {
   const navigate = useNavigate()
+
   const [state, setState] = useState({
     left: false,
   })
@@ -148,8 +192,11 @@ function AnchorTemporaryDrawer() {
 
   const [eventName, setEventName] = useState("")
   const [eventDate, setEventDate] = useState(null)
-  const [eventTime, setEventTime] = useState(null)
+  const [eventStart, setEventStart] = useState(null)
+  const [eventEnd, setEventEnd] = useState(null)
   const [eventLocation, setEventLocation] = useState({ lat: null, lng: null, building: "", room: "" });
+  const [eventDesc, setEventDesc] = useState("")
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
 
   const { searchInputRef, suggestionsRef } = useMazeMap(setEventLocation);
 
@@ -169,8 +216,11 @@ function AnchorTemporaryDrawer() {
     setOpenDialog(false)
     setEventName("")
     setEventDate(null)
-    setEventTime(null)
+    setEventStart(null)
+    setEventEnd(null)
     setEventLocation("")
+    setEventDesc("")
+    setThumbnailUrl("")
   }
 
 const handleSubmitEvent = async () => {
@@ -180,11 +230,16 @@ const handleSubmitEvent = async () => {
     return;
   }
 
+  const token = localStorage.getItem("token")  
   const eventData = {
     name: eventName,
     date: eventDate,
-    time: eventTime,
+    startTime: eventStart,
+    endTime: eventEnd,
     location: eventLocation,
+    token: token, 
+    desc: eventDesc,
+    imageUrl: thumbnailUrl,
   };
 
   try {
@@ -209,6 +264,7 @@ const handleSubmitEvent = async () => {
   }
 };
 
+
   const menuItems = [
     { text: "", icon: <CloseIcon />, action: toggleDrawer('left', false) },
     { text: "Create New Event", icon: <PlaceIcon />, action: handleCreateEvent },
@@ -217,7 +273,9 @@ const handleSubmitEvent = async () => {
     { text: "Event List", icon: <ListAltIcon />, action: () => {navigate('/eventList')} },
   ]
 
+
   const list = (anchor) => (
+
     <Box
       sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 300 }}
       role="presentation"
@@ -279,9 +337,15 @@ const handleSubmitEvent = async () => {
                 renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
               />
               <TimePicker
-                label="Event Time"
-                value={eventTime}
-                onChange={(newValue) => setEventTime(newValue)}
+                label="Event Start"
+                value={eventStart}
+                onChange={(newValue) => setEventStart(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              <TimePicker
+                label="Event End"
+                value={eventEnd}
+                onChange={(newValue) => setEventEnd(newValue)}
                 renderInput={(params) => <TextField {...params} fullWidth />}
               />
               </Box>
@@ -295,6 +359,23 @@ const handleSubmitEvent = async () => {
               />
               <div ref={suggestionsRef} id="suggestions" className="search-suggestions default"></div>
             </div>
+            <TextField
+              id="outlined-multiline-static"
+              multiline
+              rows={4}
+              fullWidth
+              label="Event Description"
+              value={eventDesc}
+              onChange={(e) => setEventDesc(e.target.value)}
+              autoComplete="off"
+            />
+            <TextField
+              fullWidth
+              label="Thumbnail URL"
+              value={thumbnailUrl}
+              onChange={(e) => setThumbnailUrl(e.target.value)}
+              autoComplete="off"
+            />
           </div>
         </DialogContent>
         <DialogActions style={{ backgroundColor: '#CFCFCF' }}>
@@ -316,3 +397,4 @@ export default function MapPage() {
     </div>
   )
 }
+
