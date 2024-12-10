@@ -28,6 +28,30 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { useNavigate } from "react-router-dom"
 
+function createMarker(map, poi, color) {
+  const lngLat = Mazemap.Util.getPoiLngLat(poi);
+  const marker = new Mazemap.MazeMarker({
+    color: color,
+    innerCircle: true,
+    innerCircleColor: '#FFF',
+    size: 34,
+    innerCircleScale: 0.5,
+    zLevel: poi.properties.zLevel,
+  })
+  .setLngLat(lngLat)
+  .addTo(map);
+
+  marker.on("click", () => {
+    marker.remove();
+    createMarker(map, poi, "#000000");
+
+    new Mazemap.Popup({closeOnClick: true, offset: [0, -6]})
+    .setLngLat( marker.getLngLat() )
+    .setHTML('This is an event description!')
+    .addTo(map);
+  });
+}
+
 function useMazeMap(setEventLocation) {
   const mapRef = useRef(null)
   const searchInputRef = useRef(null)
@@ -47,6 +71,16 @@ function useMazeMap(setEventLocation) {
 
     const map = new window.Mazemap.Map(mapOptions)
     map.addControl(new window.Mazemap.mapboxgl.NavigationControl())
+    map.on('click', onMapClick);
+
+    function onMapClick(e){
+      const lngLat = e.lngLat;
+      const zLevel = map.zLevel;
+
+      Mazemap.Data.getPoiAt(lngLat, zLevel).then( poi => {
+        createMarker(map, poi, "#ff00cc");
+      }).catch( function(){ return false; } );
+    }
     mapRef.current = map
 
     const mySearch = new window.Mazemap.Search.SearchController({
