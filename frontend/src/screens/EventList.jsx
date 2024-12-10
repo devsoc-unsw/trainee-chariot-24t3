@@ -33,7 +33,7 @@ export default function EventList() {
   const [events, setEvents] = useState([]); 
   const [allEvents, setAllEvents] = useState([]);
   const [bookmarked, setBookMarked] = useState([]); 
-  
+  const [tempEvents, setTempEvents] = useState([]); 
 
   const handleActiveButtonChange = (buttonIndex) => {
     setActiveButton(buttonIndex);
@@ -65,10 +65,39 @@ export default function EventList() {
 
     if (!storedEvents) {
       setBookMarked([]);
+      setTempEvents([]);
+      console.log("No bookmarked events")
     } else {
+      console.log("The stored events are: ", storedEvents); 
       setBookMarked(storedEvents); 
+      setTempEvents(storedEvents)
+      console.log("Some bookmarked")
     }
+
+    console.log("The setbookmarked function is " + bookmarked); 
   }, [])
+
+  useEffect(() => {
+    if (bookmarked.length !== 0 && allEvents.length !== 0) {
+      console.log(allEvents); 
+      console.log("okadokoakodkosa" + bookmarked)
+      let newBookMark = []; 
+      for (const bookmark of bookmarked) {
+        console.log("hello" + bookmark); 
+        for (const event of allEvents) {
+          if (event._id === bookmark) {
+            console.log(event._id)
+            newBookMark.push(bookmark); 
+            continue; 
+          }
+        }
+      }
+      console.log("eeeee")
+  
+      setBookMarked(newBookMark); 
+      localStorage.bookMarkedEvents = JSON.stringify(newBookMark); 
+    }
+  }, [tempEvents, allEvents])
   
   const fetchEvents = async (state) => {
     try {
@@ -112,7 +141,7 @@ export default function EventList() {
                     picture = {event.imageUrl}
                     title = {event.name} 
                     location = {makeDate(event.date) + " | " + event.location.building.replace(/<[^>]*>/g, '') + event.location.room.replace(/<[^>]*>/g, '')}
-                    body = {truncateText(event.body)}
+                    body = {truncateText(event.desc)}
                     time = {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) + "-" + new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) } 
                     events = {events}
                     setEvents = {setEvents}
@@ -235,8 +264,18 @@ function EventDetails({id, picture, title, location, body, time, events, setEven
 
 
   console.log(title)
+
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const getPicture = (picture) => {
-    return picture || arcLogo; 
+    return isValidUrl(picture) ? picture : arcLogo;
   };
 
   const openEventPage = () => {
