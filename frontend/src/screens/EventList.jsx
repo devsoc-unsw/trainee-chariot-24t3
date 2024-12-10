@@ -33,7 +33,7 @@ export default function EventList() {
   const [events, setEvents] = useState([]); 
   const [allEvents, setAllEvents] = useState([]);
   const [bookmarked, setBookMarked] = useState([]); 
-  
+  const [tempEvents, setTempEvents] = useState([]); 
 
   const handleActiveButtonChange = (buttonIndex) => {
     setActiveButton(buttonIndex);
@@ -65,10 +65,39 @@ export default function EventList() {
 
     if (!storedEvents) {
       setBookMarked([]);
+      setTempEvents([]);
+      console.log("No bookmarked events")
     } else {
+      console.log("The stored events are: ", storedEvents); 
       setBookMarked(storedEvents); 
+      setTempEvents(storedEvents)
+      console.log("Some bookmarked")
     }
+
+    console.log("The setbookmarked function is " + bookmarked); 
   }, [])
+
+  useEffect(() => {
+    if (bookmarked.length !== 0 && allEvents.length !== 0) {
+      console.log(allEvents); 
+      console.log("okadokoakodkosa" + bookmarked)
+      let newBookMark = []; 
+      for (const bookmark of bookmarked) {
+        console.log("hello" + bookmark); 
+        for (const event of allEvents) {
+          if (event._id === bookmark) {
+            console.log(event._id)
+            newBookMark.push(bookmark); 
+            continue; 
+          }
+        }
+      }
+      console.log("eeeee")
+  
+      setBookMarked(newBookMark); 
+      localStorage.bookMarkedEvents = JSON.stringify(newBookMark); 
+    }
+  }, [tempEvents, allEvents])
   
   const fetchEvents = async (state) => {
     try {
@@ -109,11 +138,11 @@ export default function EventList() {
                   <EventDetails
                     key = {event._id}
                     id = {event._id} 
-                    picture = {event.picture}
+                    picture = {event.imageUrl}
                     title = {event.name} 
                     location = {makeDate(event.date) + " | " + event.location.building.replace(/<[^>]*>/g, '') + event.location.room.replace(/<[^>]*>/g, '')}
-                    body = {truncateText(event.body)}
-                    time = {new Date(event.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} 
+                    body = {truncateText(event.desc)}
+                    time = {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) + "-" + new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) } 
                     events = {events}
                     setEvents = {setEvents}
                     owner = {event.token}
@@ -122,6 +151,11 @@ export default function EventList() {
                   />
                 ))
               }
+              {events.length === 0 && (
+                <div className='flex justify-center pt-8'>
+                  No events
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -230,17 +264,33 @@ function EventDetails({id, picture, title, location, body, time, events, setEven
 
 
   console.log(title)
+
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const getPicture = (picture) => {
-    return pictures[picture] || arcLogo; 
+    return isValidUrl(picture) ? picture : arcLogo;
   };
 
   const openEventPage = () => {
-    recentlyViewedEvents = JSON.parse(localStorage.recentlyViewedEvents);
+    if (!localStorage.recentlyViewedEvents) {
+      //RecentlyViewed Events is not initalised
+      var recentlyViewedEvents = []; 
+    } else {
+      var recentlyViewedEvents = JSON.parse(localStorage.recentlyViewedEvents);
+    }  
 
     if (!recentlyViewedEvents.includes(id)) {
       recentlyViewedEvents.unshift(id); 
     }
 
+    console.log("Opening event page")
     navigate(`/event/${id}`)
     localStorage.setItem("recentlyViewedEvents", JSON.stringify(recentlyViewedEvents))
   }; 
@@ -429,7 +479,7 @@ function EventItem({ eventId, allEvents}) {
         {truncateText(event.name, sideCharLimit)}
       </div>
       <div>
-      {new Date(event.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} {day} | {makeDate(event.date)}
+      {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} - {new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} {day} | {makeDate(event.date)}
       </div>
     </div>
   );
