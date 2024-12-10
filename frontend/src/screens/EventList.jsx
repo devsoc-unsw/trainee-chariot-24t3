@@ -31,6 +31,7 @@ const sideCharLimit = 30;
 export default function EventList() {
   const [activeButton, setActiveButton] = useState(1);
   const [events, setEvents] = useState([]); 
+  const [allEvents, setAllEvents] = useState([]);
   const [bookmarked, setBookMarked] = useState([]); 
   
 
@@ -39,8 +40,23 @@ export default function EventList() {
   };
 
   useEffect(() => {
-    fetchEvents(stateMap[activeButton])
-   
+    //Gets all the events that exist at the start
+    const getAllEvents = async () => {
+      const data = await fetchEvents("NEWEST");
+      setAllEvents(data);
+    };
+
+    getAllEvents();
+  }, [])
+
+
+  useEffect(() => {
+    const getEvents = async () => {
+      const data = await fetchEvents(stateMap[activeButton]);
+      setEvents(data);
+    };
+
+    getEvents();  
   }, [activeButton]) 
 
   //Get all bookmarked events once at the initalisation 
@@ -66,7 +82,7 @@ export default function EventList() {
 
       const responseData = await response.json(); 
 
-      setEvents(responseData.data); 
+      return responseData.data; 
     } catch (error) {
       console.log(error.message)
     }
@@ -113,8 +129,11 @@ export default function EventList() {
           <div className='flex flex-col gap-4'>
             <SavedEvents
               bookmarked = {bookmarked}
+              allEvents = {allEvents} 
             />
-            <RecentlyViewed />
+            <RecentlyViewed 
+              allEvents = {allEvents}
+            />
           </div>
         </div>
       </div>
@@ -216,6 +235,8 @@ function EventDetails({id, picture, title, location, body, time, events, setEven
   };
 
   const openEventPage = () => {
+    recentlyViewedEvents = JSON.parse(localStorage.recentlyViewedEvents);
+
     if (!recentlyViewedEvents.includes(id)) {
       recentlyViewedEvents.unshift(id); 
     }
@@ -290,7 +311,12 @@ function EventDetails({id, picture, title, location, body, time, events, setEven
 }
 
 
-function SavedEvents({bookmarked}) {
+function SavedEvents({bookmarked, allEvents}) {
+  const [savedEvents, setSavedEvents] = useState([]);
+
+  useEffect(() => {
+    setSavedEvents(bookmarked);
+  }, [bookmarked])
 
   return (
     <div className="bg-[#D9D9D9] p-5 rounded-[30px] flex gap-4 min-h-40 min-w-[440px] flex flex-col text-start  border-4">
@@ -298,12 +324,13 @@ function SavedEvents({bookmarked}) {
         Saved Events
       </div>
       <div className='flex flex-col gap-4'>
-        {bookmarked.map((eventid) => (
+        {savedEvents.map((eventid) => (
           <EventItem
             eventId = {eventid}
+            allEvents={allEvents}
           />
         ))}
-        {bookmarked.length === 0 && (
+        {savedEvents.length === 0 && (
           <div className="text-2xl text-gray-500 text-center p-4 italic ">
             No Saved Events
           </div>
@@ -313,7 +340,7 @@ function SavedEvents({bookmarked}) {
   );
 }
 
-function RecentlyViewed() {
+function RecentlyViewed({allEvents}) {
   const [deleteEvent, setDeleteEvent] = useState(false); 
 
   if (!localStorage.recentlyViewedEvents) {
@@ -344,6 +371,7 @@ function RecentlyViewed() {
         {recentlyViewedEvents.map((eventid) => (
           <EventItem 
             eventId = {eventid} 
+            allEvents= {allEvents}
           />
         ))}
         {recentlyViewedEvents.length !== 0 && (
@@ -363,37 +391,29 @@ function RecentlyViewed() {
 }
 
 
-function EventItem({ eventId }) {
+function EventItem({ eventId, allEvents}) {
   const [event, setEvent] = useState([]); 
   const [day, setDay] = useState([""]);
-
   const navigate = useNavigate(); 
 
   useEffect(() => {
-    fetchInfo(eventId)
-  },[])
+    const fetchInfo = () => {
+      const foundEvent = allEvents.find(event => event._id === eventId);
 
-  const fetchInfo = async (eventId) => {
-    try {
-      const response = await fetch(`http://localhost:5050/event/${eventId}`);
-      
-      if (!response.ok) {
-        console.log(response.json().message)
-        throw new Error(`Could not fetch the events`);
+      if (foundEvent) {
+        const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+        const date = new Date(foundEvent.time); 
+        setDay(weekday[date.getDay()]); 
+        setEvent(foundEvent)
+      } else {
+        console.log("Cannot find the event"); 
       }
-
-      const responseData = await response.json(); 
-
-      setEvent(responseData.data); 
-
-      const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-      const date = new Date(responseData.data.time); 
-      setDay(weekday[date.getDay()])  
-
-    } catch (error) {
-      console.log(error.message)
+  
     }
-  }
+
+    fetchInfo()
+
+  },[eventId, allEvents])
 
   const openEventPage = () => {
     navigate(`/event/${eventId}`)
@@ -509,14 +529,14 @@ function BookMarkButton({id, bookmarked, setBookMarked}) {
     if (bookmarked.includes(id)) {
       setBooked(true); 
     }  
-  }, [id, bookmarked])
+  }, [])
 
 
   const bookMarkEvent = () => {
     let newBookmarked = []; 
 
     if (!bookmarked.includes(id)) {
-      newBookmarked = [id, ...bookmarked];
+      newBookmarked = [...bookmarked, id];
       setBooked(true)
     } else {
       //Already included bookmark
