@@ -113,7 +113,7 @@ export default function EventList() {
                     title = {event.name} 
                     location = {makeDate(event.date) + " | " + event.location.building.replace(/<[^>]*>/g, '') + event.location.room.replace(/<[^>]*>/g, '')}
                     body = {truncateText(event.body)}
-                    time = {new Date(event.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} 
+                    time = {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) + "-" + new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) } 
                     events = {events}
                     setEvents = {setEvents}
                     owner = {event.token}
@@ -235,12 +235,18 @@ function EventDetails({id, picture, title, location, body, time, events, setEven
   };
 
   const openEventPage = () => {
-    recentlyViewedEvents = JSON.parse(localStorage.recentlyViewedEvents);
+    if (!localStorage.recentlyViewedEvents) {
+      //RecentlyViewed Events is not initalised
+      var recentlyViewedEvents = []; 
+    } else {
+      var recentlyViewedEvents = JSON.parse(localStorage.recentlyViewedEvents);
+    }  
 
     if (!recentlyViewedEvents.includes(id)) {
       recentlyViewedEvents.unshift(id); 
     }
 
+    console.log("Opening event page")
     navigate(`/event/${id}`)
     localStorage.setItem("recentlyViewedEvents", JSON.stringify(recentlyViewedEvents))
   }; 
@@ -429,7 +435,7 @@ function EventItem({ eventId, allEvents}) {
         {truncateText(event.name, sideCharLimit)}
       </div>
       <div>
-      {new Date(event.time).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} {day} | {makeDate(event.date)}
+      {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} - {new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} {day} | {makeDate(event.date)}
       </div>
     </div>
   );
