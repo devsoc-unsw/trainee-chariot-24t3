@@ -109,7 +109,7 @@ export default function EventList() {
                   <EventDetails
                     key = {event._id}
                     id = {event._id} 
-                    picture = {event.picture}
+                    picture = {event.imageUrl}
                     title = {event.name} 
                     location = {makeDate(event.date) + " | " + event.location.building.replace(/<[^>]*>/g, '') + event.location.room.replace(/<[^>]*>/g, '')}
                     body = {truncateText(event.body)}
@@ -122,6 +122,11 @@ export default function EventList() {
                   />
                 ))
               }
+              {events.length === 0 && (
+                <div className='flex justify-center pt-8'>
+                  No events
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -231,7 +236,7 @@ function EventDetails({id, picture, title, location, body, time, events, setEven
 
   console.log(title)
   const getPicture = (picture) => {
-    return pictures[picture] || arcLogo; 
+    return picture || arcLogo; 
   };
 
   const openEventPage = () => {
