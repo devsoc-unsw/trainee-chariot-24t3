@@ -458,19 +458,24 @@ function EventItem({ eventId, allEvents}) {
         setDay(weekday[date.getDay()]); 
         setEvent(foundEvent)
       } else {
-        console.log("Cannot find the event"); 
+        //If the event does not exist, then do not display any event! 
+        setEvent(null); 
       }
   
     }
 
     fetchInfo()
-
+    
   },[eventId, allEvents])
 
   const openEventPage = () => {
     navigate(`/event/${eventId}`)
   }; 
 
+  if (!event) {
+    return null; 
+  }
+  
 
   return (
     <div className='bg-[#EFD780] min-h-16 rounded-[10px]	flex flex-col p-2 cursor-pointer hover:bg-[#E5C453]'
