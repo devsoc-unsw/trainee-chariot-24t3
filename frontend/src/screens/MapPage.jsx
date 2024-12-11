@@ -111,7 +111,8 @@ function AnchorTemporaryDrawer() {
     left: false,
   })
 
-  const [openDialog, setOpenDialog] = useState(false)
+  const [openEventCreate, setOpenEventCreate] = useState(false)
+  const [openEditEvent, setEditEvent] = useState(false)
 
   const [eventName, setEventName] = useState("")
   const [eventDate, setEventDate] = useState(null)
@@ -131,12 +132,17 @@ function AnchorTemporaryDrawer() {
   }
 
   const handleCreateEvent = () => {
-    setOpenDialog(true)
+    setOpenEventCreate(true)
+    setState({ ...state, left: false })
+  }
+
+  const handleEditEvent = () => {
+    setEditEvent(true)
     setState({ ...state, left: false })
   }
 
   const handleCloseDialog = () => {
-    setOpenDialog(false)
+    setOpenEventCreate(false)
     setEventName("")
     setEventDate(null)
     setEventStart(null)
@@ -187,11 +193,52 @@ const handleSubmitEvent = async () => {
   }
 };
 
+const handleEditChanges = async () => {
+  //TODO: find the event we are editing (unsure how we are doing this)
+  if (!eventLocation.lat || !eventLocation.lng) {
+    console.log(eventLocation);
+    alert("Please select a valid location from the map search box.");
+    return;
+  }
+
+  const token = localStorage.getItem("token")  
+  const eventData = {
+    name: eventName,
+    date: eventDate,
+    startTime: eventStart,
+    endTime: eventEnd,
+    location: eventLocation,
+    token: token, 
+    desc: eventDesc,
+    imageUrl: thumbnailUrl,
+  };
+
+  try {
+    const response = await fetch("http://localhost:5050/event/edit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(eventData),
+    });
+
+    if (response.ok) {
+      alert("Event edited successfully!");
+      handleCloseDialog();
+    } else {
+      consoles.log(response);
+      alert("Failed to edit event. Please try again.");
+    }
+  } catch (error) {
+    console.error("Error editing event:", error);
+    alert("An error occurred while editing the event. Please try again.");
+  }
+};
 
   const menuItems = [
     { text: "", icon: <CloseIcon />, action: toggleDrawer('left', false) },
     { text: "Create New Event", icon: <PlaceIcon />, action: handleCreateEvent },
-    { text: "Edit Event", icon: <CreateIcon />, action: () => {} },
+    { text: "Edit Event", icon: <CreateIcon />, action: () => handleEditEvent },
     { text: "Saved", icon: <TurnedInIcon />, action: () => {} },
     { text: "Event List", icon: <ListAltIcon />, action: () => {navigate('/eventList')} },
   ]
@@ -231,13 +278,90 @@ const handleSubmitEvent = async () => {
       >
         {list('left')}
       </Drawer>
+      {/* createEvent Dialogue */}
       <Dialog
-        open={openDialog}
+        open={openEventCreate}
         onClose={handleCloseDialog}
         sx={{ borderRadius: '16px' }}
       >
         <DialogTitle style={{ backgroundColor: '#CFCFCF' }}>
           Create New Event
+        </DialogTitle>
+        <DialogContent style={{ backgroundColor: '#CFCFCF' }}>
+          <div className="space-y-4 mt-4">
+            <TextField
+              fullWidth
+              label="Event Name"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              autoComplete="off"
+            />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <Box 
+                display={'flex'}
+                justifyContent={'space-between'}
+                gap={2}
+              ><DatePicker
+                label="Event Date"
+                value={eventDate}
+                onChange={(newValue) => setEventDate(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
+              />
+              <TimePicker
+                label="Event Start"
+                value={eventStart}
+                onChange={(newValue) => setEventStart(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              <TimePicker
+                label="Event End"
+                value={eventEnd}
+                onChange={(newValue) => setEventEnd(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              </Box>
+            </LocalizationProvider>
+            <div id="search-input-container" className="search-control-default">
+              <TextField
+                fullWidth
+                label="Location"
+                inputRef={searchInputRef}
+                autoComplete="off"
+              />
+              <div ref={suggestionsRef} id="suggestions" className="search-suggestions default"></div>
+            </div>
+            <TextField
+              id="outlined-multiline-static"
+              multiline
+              rows={4}
+              fullWidth
+              label="Event Description"
+              value={eventDesc}
+              onChange={(e) => setEventDesc(e.target.value)}
+              autoComplete="off"
+            />
+            <TextField
+              fullWidth
+              label="Thumbnail URL"
+              value={thumbnailUrl}
+              onChange={(e) => setThumbnailUrl(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+        </DialogContent>
+        <DialogActions style={{ backgroundColor: '#CFCFCF' }}>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleSubmitEvent}>Create</Button>
+        </DialogActions>
+      </Dialog>
+      {/* editEvent Dialogue*/}
+      <Dialog
+        open={openEditEvent}
+        onClose={handleCloseDialog}
+        sx={{ borderRadius: '16px' }}
+      >
+        <DialogTitle style={{ backgroundColor: '#CFCFCF' }}>
+          Edit Event
         </DialogTitle>
         <DialogContent style={{ backgroundColor: '#CFCFCF' }}>
           <div className="space-y-4 mt-4">
