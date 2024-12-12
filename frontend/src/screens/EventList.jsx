@@ -120,7 +120,7 @@ export default function EventList() {
 
 
   return (
-    <div className="bg-[#FFF8D3] min-h-screen shadow-inner pl-10 pr-10 ">
+    <div className="bg-[#FFF3E2] min-h-screen shadow-inner pl-10 pr-10 ">
       <div className="flex justify-start text-3xl text-[#6F6F6F] pt-5 pb-5">  
         Events
       </div>
@@ -454,23 +454,36 @@ function EventItem({ eventId, allEvents}) {
 
       if (foundEvent) {
         const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-        const date = new Date(foundEvent.time); 
-        setDay(weekday[date.getDay()]); 
+        const date = new Date(foundEvent.date); 
+        const options = { 
+          weekday: "long",
+          month: "long", 
+          day: "numeric", 
+          year: "numeric" 
+        };
+        
+        const formattedDate = date.toLocaleDateString("en-US", options);
+        setDay(formattedDate); 
         setEvent(foundEvent)
       } else {
-        console.log("Cannot find the event"); 
+        //If the event does not exist, then do not display any event! 
+        setEvent(null); 
       }
   
     }
 
     fetchInfo()
-
+    
   },[eventId, allEvents])
 
   const openEventPage = () => {
     navigate(`/event/${eventId}`)
   }; 
 
+  if (!event) {
+    return null; 
+  }
+  
 
   return (
     <div className='bg-[#EFD780] min-h-16 rounded-[10px]	flex flex-col p-2 cursor-pointer hover:bg-[#E5C453]'
@@ -479,7 +492,7 @@ function EventItem({ eventId, allEvents}) {
         {truncateText(event.name, sideCharLimit)}
       </div>
       <div>
-      {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} - {new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} {day} | {makeDate(event.date)}
+      {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}  {day} 
       </div>
     </div>
   );
