@@ -454,8 +454,16 @@ function EventItem({ eventId, allEvents}) {
 
       if (foundEvent) {
         const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-        const date = new Date(foundEvent.time); 
-        setDay(weekday[date.getDay()]); 
+        const date = new Date(foundEvent.date); 
+        const options = { 
+          weekday: "long",
+          month: "long", 
+          day: "numeric", 
+          year: "numeric" 
+        };
+        
+        const formattedDate = date.toLocaleDateString("en-US", options);
+        setDay(formattedDate); 
         setEvent(foundEvent)
       } else {
         //If the event does not exist, then do not display any event! 
@@ -484,7 +492,7 @@ function EventItem({ eventId, allEvents}) {
         {truncateText(event.name, sideCharLimit)}
       </div>
       <div>
-      {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} - {new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} {day} | {makeDate(event.date)}
+      {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}  {day} 
       </div>
     </div>
   );
