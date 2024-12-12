@@ -65,7 +65,7 @@ function EventPage() {
 
   return (
     <div>
-      <div className="w-full h-screen bg-[#FCFDAF]">
+      <div className="w-full h-screen bg-[#FFF3E2]">
         <div className="font-bold text-3xl p-8">
           {event.name}
         </div>

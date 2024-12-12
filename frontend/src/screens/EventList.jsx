@@ -120,7 +120,7 @@ export default function EventList() {
 
 
   return (
-    <div className="bg-[#FFF8D3] min-h-screen shadow-inner pl-10 pr-10 ">
+    <div className="bg-[#FFF3E2] min-h-screen shadow-inner pl-10 pr-10 ">
       <div className="flex justify-start text-3xl text-[#6F6F6F] pt-5 pb-5">  
         Events
       </div>
