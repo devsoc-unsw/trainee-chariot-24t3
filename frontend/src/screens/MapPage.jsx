@@ -75,9 +75,11 @@ function useMazeMap(setEventLocation) {
             setEventLocation({
               lat: geometry.coordinates[1],
               lng: geometry.coordinates[0],
-              building: properties.buildingname || '',
-              room: properties.title || '',
+              building: properties.dispBldNames[0] || '',
+              room: properties.dispPoiNames[0] || '',
+              title: properties.title || ''
             });
+            console.log(e); 
             console.log("hi");
           }
         });
@@ -154,6 +156,7 @@ const handleSubmitEvent = async () => {
   }
 
   const token = localStorage.getItem("token")  
+
   const eventData = {
     name: eventName,
     date: eventDate,
@@ -191,8 +194,8 @@ const handleSubmitEvent = async () => {
   const menuItems = [
     { text: "", icon: <CloseIcon />, action: toggleDrawer('left', false) },
     { text: "Create New Event", icon: <PlaceIcon />, action: handleCreateEvent },
-    { text: "Edit Event", icon: <CreateIcon />, action: () => {} },
-    { text: "Saved", icon: <TurnedInIcon />, action: () => {} },
+    // { text: "Edit Event", icon: <CreateIcon />, action: () => {} },
+    // { text: "Saved", icon: <TurnedInIcon />, action: () => {} },
     { text: "Event List", icon: <ListAltIcon />, action: () => {navigate('/eventList')} },
   ]
 

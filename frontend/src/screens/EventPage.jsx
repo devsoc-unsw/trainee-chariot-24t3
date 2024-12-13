@@ -86,7 +86,7 @@ function EventPage() {
             <div className="flex-1 p-4">
               <h2 className="text-3xl font-semibold text-white p-6">Where</h2>
               
-              <p className="text-xl text-white">{event.location.building + event.location.room.replace(/<[^>]*>/g, '')}</p>
+              <p className="text-xl text-white">{event.location.room.replace(/<[^>]*>/g, '') + " " +event.location.building.replace(/<[^>]*>/g, '')}</p>
             </div>
             <div className="flex-1 p-4">
               <h2 className="text-3xl font-semibold text-white p-6">When</h2>

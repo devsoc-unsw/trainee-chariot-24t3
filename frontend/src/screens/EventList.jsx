@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import arcLogo from "../assets/arcLogo.jpg";
 import climateExpo from "../assets/climateExpo.jpg";
 import axios from "axios";
@@ -10,6 +10,17 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import NewButton from "@mui/material/Button"
+import Box from "@mui/material/Box"
+import Dialog from "@mui/material/Dialog"
+import DialogActions from "@mui/material/DialogActions"
+import DialogContent from "@mui/material/DialogContent"
+import DialogTitle from "@mui/material/DialogTitle"
+import { TextField, useEventCallback } from "@mui/material"
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 
 const PORT = 5050;
 
@@ -79,20 +90,15 @@ export default function EventList() {
 
   useEffect(() => {
     if (bookmarked.length !== 0 && allEvents.length !== 0) {
-      console.log(allEvents); 
-      console.log("okadokoakodkosa" + bookmarked)
       let newBookMark = []; 
       for (const bookmark of bookmarked) {
-        console.log("hello" + bookmark); 
         for (const event of allEvents) {
           if (event._id === bookmark) {
-            console.log(event._id)
             newBookMark.push(bookmark); 
             continue; 
           }
         }
       }
-      console.log("eeeee")
   
       setBookMarked(newBookMark); 
       localStorage.bookMarkedEvents = JSON.stringify(newBookMark); 
@@ -140,7 +146,7 @@ export default function EventList() {
                     id = {event._id} 
                     picture = {event.imageUrl}
                     title = {event.name} 
-                    location = {makeDate(event.date) + " | " + event.location.building.replace(/<[^>]*>/g, '') + event.location.room.replace(/<[^>]*>/g, '')}
+                    location = {makeDate(event.date) + " | " + event.location.room.replace(/<[^>]*>/g, '') + " " +event.location.building.replace(/<[^>]*>/g, '')}
                     body = {truncateText(event.desc)}
                     time = {new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) + "-" + new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) } 
                     events = {events}
@@ -177,7 +183,8 @@ export default function EventList() {
 
 function NavigationList({ onActiveButtonChange }) {
   const [activeButton, setActiveButton] = useState(1);
-
+  const [showingEdit, setShowingEdit] = useState(false); 
+  
   const handleButtonClick = (buttonIndex) => {
     setActiveButton(buttonIndex);
     onActiveButtonChange(buttonIndex); 
@@ -223,12 +230,169 @@ function NavigationList({ onActiveButtonChange }) {
             <Button
             label="+ Add Event"
             variant={'eventAdd'}
-            onClick = {() => handleSubmitEvent()}
+            onClick = {() => {setShowingEdit(true)}}
             />
+            {showingEdit && <MakeEvent 
+            openDialog={showingEdit}
+            setOpenDialog = {setShowingEdit}/>}
           </div> 
         </div>
     </div>
   );
+}
+
+function MakeEvent({openDialog, setOpenDialog}) {
+
+  // const [openDialog, setOpenDialog] = useState(false)
+
+  const [eventName, setEventName] = useState("")
+  const [eventDate, setEventDate] = useState(null)
+  const [eventStart, setEventStart] = useState(null)
+  const [eventEnd, setEventEnd] = useState(null)
+  const [eventLocation, setEventLocation] = useState({ lat: null, lng: null, building: "", room: "" });
+  const [eventDesc, setEventDesc] = useState("")
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const { searchInputRef, suggestionsRef } = useMazeMap(setEventLocation);
+
+  const handleCreateEvent = () => {
+    setOpenDialog(true)
+    setState({ ...state, left: false })
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false)
+    setEventName("")
+    setEventDate(null)
+    setEventStart(null)
+    setEventEnd(null)
+    setEventLocation("")
+    setEventDesc("")
+    setThumbnailUrl("")
+  }
+
+  
+  const handleSubmitEvent = async () => {
+    if (!eventLocation.lat || !eventLocation.lng) {
+      console.log(eventLocation);
+      alert("Please select a valid location from the map search box.");
+      return;
+    }
+
+    const token = localStorage.getItem("token")  
+
+    const eventData = {
+      name: eventName,
+      date: eventDate,
+      startTime: eventStart,
+      endTime: eventEnd,
+      location: eventLocation,
+      token: token, 
+      desc: eventDesc,
+      imageUrl: thumbnailUrl,
+    };
+
+    try {
+      const response = await fetch("http://localhost:5050/event/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
+      });
+
+      if (response.ok) {
+        console.log(response.data)
+        alert("Event created successfully! Please restart your page to see the event");
+        handleCloseDialog();
+      } else {
+        consoles.log(response);
+        alert("Failed to create event. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating event:", error);
+      alert("An error occurred while creating the event. Please try again.");
+    }
+  };
+
+  return (
+    <div className="absolute top-auto left-auto z-10">
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        sx={{ borderRadius: '16px' }}
+      >
+        <DialogTitle style={{ backgroundColor: '#CFCFCF' }}>
+          Create New Event
+        </DialogTitle>
+        <DialogContent style={{ backgroundColor: '#CFCFCF' }}>
+          <div className="space-y-4 mt-4">
+            <TextField
+              fullWidth
+              label="Event Name"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              autoComplete="off"
+            />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <Box 
+                display={'flex'}
+                justifyContent={'space-between'}
+                gap={2}
+              ><DatePicker
+                label="Event Date"
+                value={eventDate}
+                onChange={(newValue) => setEventDate(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
+              />
+              <TimePicker
+                label="Event Start"
+                value={eventStart}
+                onChange={(newValue) => setEventStart(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              <TimePicker
+                label="Event End"
+                value={eventEnd}
+                onChange={(newValue) => setEventEnd(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              </Box>
+            </LocalizationProvider>
+            <div id="search-input-container" className="search-control-default">
+              <TextField
+                fullWidth
+                label="Location"
+                inputRef={searchInputRef}
+                autoComplete="off"
+              />
+              <div ref={suggestionsRef} id="suggestions" className="search-suggestions default"></div>
+            </div>
+            <TextField
+              id="outlined-multiline-static"
+              multiline
+              rows={4}
+              fullWidth
+              label="Event Description"
+              value={eventDesc}
+              onChange={(e) => setEventDesc(e.target.value)}
+              autoComplete="off"
+            />
+            <TextField
+              fullWidth
+              label="Thumbnail URL"
+              value={thumbnailUrl}
+              onChange={(e) => setThumbnailUrl(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+        </DialogContent>
+        <DialogActions style={{ backgroundColor: '#CFCFCF', color: 'black' }}>
+          <NewButton onClick={handleCloseDialog} style={{ color: 'black' }}>Cancel</NewButton>
+          <NewButton onClick={handleSubmitEvent} style={{ color: 'black' }}>Create</NewButton>
+        </DialogActions>
+      </Dialog>
+    </div>
+  )
 }
 
 const Button = ({ label, type = 'button', variant = 'primary', onClick }) => {
@@ -263,8 +427,6 @@ function EventDetails({id, picture, title, location, body, time, events, setEven
   }
 
 
-  console.log(title)
-
   const isValidUrl = (url) => {
     try {
       new URL(url);
@@ -290,7 +452,6 @@ function EventDetails({id, picture, title, location, body, time, events, setEven
       recentlyViewedEvents.unshift(id); 
     }
 
-    console.log("Opening event page")
     navigate(`/event/${id}`)
     localStorage.setItem("recentlyViewedEvents", JSON.stringify(recentlyViewedEvents))
   }; 
@@ -542,10 +703,8 @@ function DeleteButton({id, events, setEvents, bookmarked, setBookMarked}) {
     e.stopPropagation();
     e.preventDefault();
     try {
-      console.log("the id is: " + id); 
       await axios.delete(`http://localhost:${PORT}/event/${id}`, {
       });
-      console.log("Event deleted successfully");
 
       recentlyViewedEvents = recentlyViewedEvents.filter(event => event !== id); 
       bookMarkedEvents = bookMarkedEvents.filter(event => event !== id); 
@@ -575,19 +734,260 @@ function DeleteButton({id, events, setEvents, bookmarked, setBookMarked}) {
   );
 }
 
+function useMazeMap(setEventLocation) {
+  const searchInputRef = useRef(null)
+  const suggestionsRef = useRef(null)
+  const searchInputInstanceRef = useRef(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.Mazemap) return
+
+    const mySearch = new window.Mazemap.Search.SearchController({
+      campusid: 111,
+      rows: 10,
+      withpois: true,
+      withbuilding: false,
+      withtype: false,
+      withcampus: false,
+      resultsFormat: 'geojson',
+    })
+
+    const initializeSearch = () => {
+      if (searchInputRef.current && suggestionsRef.current) {
+        const mySearchInput = new window.Mazemap.Search.SearchInput({
+          container: document.getElementById('search-input-container'),
+          input: searchInputRef.current,
+          suggestions: suggestionsRef.current,
+          searchController: mySearch,
+        })
+
+        mySearchInput.on("itemclick", (e) => {
+          const { geometry, properties } = e.item;
+          setEventLocation({
+            lat: geometry.coordinates[1],
+            lng: geometry.coordinates[0],
+            building: properties.dispBldNames[0] || '',
+            room: properties.dispPoiNames[0] || '',
+            title: properties.title || ''
+          })
+        })
+
+        searchInputInstanceRef.current = mySearchInput
+        searchInputRef.current.addEventListener('input', () => {
+          searchInputInstanceRef.current?.trigger()
+        })
+      } else {
+        setTimeout(initializeSearch, 100)
+      }
+    }
+
+    initializeSearch()
+  }, [])
+
+  return { searchInputRef, suggestionsRef }
+}
+
+
 function EditButton({id}) {
+  const [showingEdit, setShowingEdit] = useState(false); 
+  const [event, setEvent] = useState([]); 
+
+  useEffect(() => {
+    console.log("Fetching event data")
+    fetchInfo(id)
+  },[])
+
+  const fetchInfo = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5050/event/${id}`);
+      
+      if (!response.ok) {
+        console.log(response.json().message)
+        throw new Error(`Could not fetch the events`);
+      }
+
+      const responseData = await response.json(); ;
+      setEvent(responseData.data); 
+    } catch (error) {
+      console.log(error.message)
+    } 
+  }
 
   return (
     <div className="cursor-pointer pointer-events-auto w-full">
       <button
         className=" flex w-full h-14 gap-2 p-5 bg-[#FFB800] hover:bg-[#E6A800] z-10 rounded-[20px] justify-center items-center text-2xl pointer-events-auto"
-        // onClick = {deleteEvent}
+        onClick = {() => {
+          setShowingEdit(true)
+        }}
       >
         <EditIcon/>Edit Event 
       </button>
+      {showingEdit && <EditScreen event = {event}
+      openDialog={showingEdit}
+      setOpenDialog = {setShowingEdit}/>}
     </div>
   );
 }
+
+function EditScreen({event, openDialog, setOpenDialog}) {
+
+  // const [openDialog, setOpenDialog] = useState(false)
+
+  const [eventName, setEventName] = useState(event.name)
+  const [eventDate, setEventDate] = useState(new Date(event.date));
+  const [eventStart, setEventStart] = useState(new Date(event.startTime))
+  const [eventEnd, setEventEnd] = useState(new Date(event.endTime))
+  const [eventLocation, setEventLocation] = useState(event.location);
+  const [eventDesc, setEventDesc] = useState(event.desc)
+  const [thumbnailUrl, setThumbnailUrl] = useState(event.imageUrl);
+  const { searchInputRef, suggestionsRef } = useMazeMap(setEventLocation);
+
+  const handleCreateEvent = () => {
+    setOpenDialog(true)
+    setState({ ...state, left: false })
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false)
+    setEventName("")
+    setEventDate(null)
+    setEventStart(null)
+    setEventEnd(null)
+    setEventLocation("")
+    setEventDesc("")
+    setThumbnailUrl("")
+  }
+
+  
+  const handleSubmitEvent = async () => {
+    if (!eventLocation.lat || !eventLocation.lng) {
+      alert("Please select a valid location from the map search box.");
+      return;
+    }
+
+    const token = localStorage.getItem("token")  
+
+    const eventData = {
+      name: eventName,
+      date: eventDate,
+      startTime: eventStart,
+      endTime: eventEnd,
+      location: eventLocation,
+      token: token, 
+      desc: eventDesc,
+      imageUrl: thumbnailUrl,
+    };
+
+    try {
+      const response = await fetch(`http://localhost:5050/event/${event._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
+      });
+
+      if (response.ok) {
+        console.log(response.data)
+        alert("Event updated successfully!");
+        handleCloseDialog();
+        location.reload()
+      } else {
+        console.log(response);
+        alert("Failed to update event. Please try again.");
+      }
+    } catch (error) {
+      console.log("Error updating event:", error);
+      alert("An error occurred while updating the event. Please try again.");
+    }
+  };
+
+  return (
+    <div className="absolute top-auto left-auto z-10">
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        sx={{ borderRadius: '16px' }}
+      >
+        <DialogTitle style={{ backgroundColor: '#CFCFCF' }}>
+          Edit Event
+        </DialogTitle>
+        <DialogContent style={{ backgroundColor: '#CFCFCF' }}>
+          <div className="space-y-4 mt-4">
+            <TextField
+              fullWidth
+              label="Event Name"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              autoComplete="off"
+            />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <Box 
+                display={'flex'}
+                justifyContent={'space-between'}
+                gap={2}
+              >
+              <DatePicker
+                label="Event Date"
+                value={eventDate} 
+                onChange={(newValue) => setEventDate(newValue) + console.log(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
+              />
+              <TimePicker
+                label="Event Start"
+                value={eventStart}
+                onChange={(newValue) => setEventStart(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              <TimePicker
+                label="Event End"
+                value={eventEnd}
+                onChange={(newValue) => setEventEnd(newValue)}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+              </Box>
+            </LocalizationProvider>
+            <div id="search-input-container" className="search-control-default">
+              <TextField
+                fullWidth
+                label="Location"
+                defaultValue={event.location.title.replace(/<[^>]*>/g, '')}
+                //To change to location.title when all events have a title field
+                inputRef={searchInputRef}
+                autoComplete="off"
+              />
+              <div ref={suggestionsRef} id="suggestions" className="search-suggestions default"></div>
+            </div>
+            <TextField
+              id="outlined-multiline-static"
+              multiline
+              rows={4}
+              fullWidth
+              label="Event Description"
+              value={eventDesc}
+              onChange={(e) => setEventDesc(e.target.value)}
+              autoComplete="off"
+            />
+            <TextField
+              fullWidth
+              label="Thumbnail URL"
+              value={thumbnailUrl}
+              onChange={(e) => setThumbnailUrl(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+        </DialogContent>
+        <DialogActions style={{ backgroundColor: '#CFCFCF', color: 'black' }}>
+          <NewButton onClick={handleCloseDialog} style={{ color: 'black' }}>Cancel</NewButton>
+          <NewButton onClick={handleSubmitEvent} style={{ color: 'black' }}>Edit Event</NewButton>
+        </DialogActions>
+      </Dialog>
+    </div>
+  )
+}
+
+
 
 function BookMarkButton({id, bookmarked, setBookMarked}) {
   const [booked, setBooked] = useState(false); 
