@@ -28,7 +28,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { useNavigate } from "react-router-dom"
 
-function createMarker(coord, map, zLevel, color) {
+function createMarker(coord, map, zLevel, color, eventName, eventLocation, eventTime) {
   const lngLat = coord;
   const marker = new Mazemap.MazeMarker({
     color: color,
@@ -47,7 +47,9 @@ function createMarker(coord, map, zLevel, color) {
 
     new Mazemap.Popup({ closeOnClick: true, offset: [0, -6] })
       .setLngLat(marker.getLngLat())
-      .setHTML("This is an event description!")
+      .setHTML(`<h3 style="font-weight: bold">${eventName}</h3>
+                <p style="max-width: 160px;">${eventLocation}</p>
+                <p style="max-width: 160px;">${eventTime}</p>`)
       .addTo(map);
   });
 }
@@ -97,9 +99,15 @@ function useMazeMap(setEventLocation) {
 
     allOngoingEvents().then((data) => {
       data.forEach((item) => {
-         const lngLat = { lng: item.location.lng, lat: item.location.lat };
-         const zLevel = map.zLevel;
-         createMarker(lngLat, map, zLevel, "#ff00cc");
+        const lngLat = { lng: item.location.lng, lat: item.location.lat };
+        const zLevel = map.zLevel;
+        const name = item.name;
+        const location = `${item.location.building}, ${item.location.room}`;
+        let time = "";
+        if (item.startTime && item.endTime) {
+          time = `${item.startTime} - ${item.endTime}`;
+        }
+        createMarker(lngLat, map, zLevel, "#ff00cc", name, location, time);
       });
       console.log(data);
     });
@@ -110,12 +118,9 @@ function useMazeMap(setEventLocation) {
     // function onMapClick(e){
     //   const lngLat = e.lngLat;
     //   const zLevel = map.zLevel;
-
-    //   Mazemap.Data.getPoiAt(lngLat, zLevel).then( poi => {
-    //     createMarker(map, poi, "#ff00cc");
-    //   }).catch( function(){ return false; } );
+    //   createMarker(lngLat, map, zLevel, "#ff00cc", "DevSoc Event", "Blockhouse, G034", "");
     // }
-    
+
     mapRef.current = map
 
     const mySearch = new window.Mazemap.Search.SearchController({
