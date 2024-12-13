@@ -951,7 +951,8 @@ function EditScreen({event, openDialog, setOpenDialog}) {
             <div id="search-input-container" className="search-control-default">
               <TextField
                 fullWidth
-                label={event.location.room.replace(/<[^>]*>/g, '')}
+                label="Location"
+                defaultValue={event.location.title.replace(/<[^>]*>/g, '')}
                 //To change to location.title when all events have a title field
                 inputRef={searchInputRef}
                 autoComplete="off"
