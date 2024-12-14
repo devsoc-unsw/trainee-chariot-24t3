@@ -259,7 +259,15 @@ const handleSubmitEvent = async () => {
               ><DatePicker
                 label="Event Date"
                 value={eventDate}
-                onChange={(newValue) => setEventDate(newValue.toISOString().split('T')[0])}
+                onChange={(newValue) => {
+                  //Converts whatever event date is to UTC 
+                  const utcDate = new Date(Date.UTC(
+                    newValue.getFullYear(),
+                    newValue.getMonth(),
+                    newValue.getDate()
+                  ));
+                  setEventDate(utcDate);
+                }}                  
                 renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
               />
               <TimePicker
