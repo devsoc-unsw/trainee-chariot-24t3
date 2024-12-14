@@ -389,7 +389,15 @@ function AnchorTemporaryDrawer() {
                 <DatePicker
                   label="Event Date"
                   value={eventDate}
-                  onChange={(newValue) => setEventDate(newValue)}
+                  onChange={(newValue) => {
+                  //Converts whatever event date is to UTC 
+                  const utcDate = new Date(Date.UTC(
+                    newValue.getFullYear(),
+                    newValue.getMonth(),
+                    newValue.getDate()
+                  ));
+                  setEventDate(utcDate);
+                }}                  
                   renderInput={(params) => (
                     <TextField {...params} fullWidth sx={{ marginRight: 4 }} />
                   )}
