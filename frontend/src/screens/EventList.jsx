@@ -21,6 +21,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 
 const PORT = 5050;
 
@@ -144,14 +145,9 @@ export default function EventList() {
                   id={event._id}
                   picture={event.imageUrl}
                   title={event.name}
-                  location={
-                    makeDate(event.date) +
-                    " | " +
-                    event.location.room.replace(/<[^>]*>/g, "") +
-                    " " +
-                    event.location.building.replace(/<[^>]*>/g, "")
-                  }
-                  body={truncateText(event.desc)}
+                  date={makeDate(event.date)}
+                  location={event.location.room.replace(/<[^>]*>/g, "")}
+                  body={event.desc}
                   time={
                     new Date(event.startTime).toLocaleTimeString("en-US", {
                       hour: "2-digit",
@@ -199,9 +195,9 @@ function NavigationList({ onActiveButtonChange }) {
   };
 
   return (
-    <div className="bg-[#D9D9D9] p-4 rounded-[20px] h-[46rem] w-64 flex flex-col content-between gap-[400px] border-4 border-">
+    <div className="bg-white p-4 rounded-[20px] h-[18rem] w-64 flex flex-col content-between gap-[40px] border-4 ">
       <div className="flex flex-col gap-1">
-        <div className="w-full">
+        <div className="w-full justify-start flex">
           <Button
             label="Upcoming"
             variant={activeButton === 1 ? "primary" : "default"}
@@ -210,7 +206,7 @@ function NavigationList({ onActiveButtonChange }) {
         </div>
         <div className="w-full">
           <Button
-            label="Ongoing"
+            label="Today"
             variant={activeButton === 2 ? "primary" : "default"}
             onClick={() => handleButtonClick(2)}
           />
@@ -222,8 +218,6 @@ function NavigationList({ onActiveButtonChange }) {
             onClick={() => handleButtonClick(3)}
           />
         </div>
-      </div>
-      <div className="">
         <div className="w-full">
           <Button
             label="My Events"
@@ -231,6 +225,8 @@ function NavigationList({ onActiveButtonChange }) {
             onClick={() => handleButtonClick(4)}
           />
         </div>
+      </div>
+      <div className="">
         <div>
           <Button
             label="+ Add Event"
@@ -349,36 +345,37 @@ function MakeEvent({ openDialog, setOpenDialog }) {
               autoComplete="off"
             />
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <Box 
-                display={'flex'}
-                justifyContent={'space-between'}
-                gap={2}
-              ><DatePicker
-                label="Event Date"
-                value={eventDate}
-                onChange={(newValue) => {
-                  //Converts whatever event date is to UTC 
-                  const utcDate = new Date(Date.UTC(
-                    newValue.getFullYear(),
-                    newValue.getMonth(),
-                    newValue.getDate()
-                  ));
-                  setEventDate(utcDate);
-                }}                
-                renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
-              />
-              <TimePicker
-                label="Event Start"
-                value={eventStart}
-                onChange={(newValue) => setEventStart(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth />}
-              />
-              <TimePicker
-                label="Event End"
-                value={eventEnd}
-                onChange={(newValue) => setEventEnd(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth />}
-              />
+              <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+                <DatePicker
+                  label="Event Date"
+                  value={eventDate}
+                  onChange={(newValue) => {
+                    //Converts whatever event date is to UTC
+                    const utcDate = new Date(
+                      Date.UTC(
+                        newValue.getFullYear(),
+                        newValue.getMonth(),
+                        newValue.getDate()
+                      )
+                    );
+                    setEventDate(utcDate);
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} fullWidth sx={{ marginRight: 4 }} />
+                  )}
+                />
+                <TimePicker
+                  label="Event Start"
+                  value={eventStart}
+                  onChange={(newValue) => setEventStart(newValue)}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
+                />
+                <TimePicker
+                  label="Event End"
+                  value={eventEnd}
+                  onChange={(newValue) => setEventEnd(newValue)}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
+                />
               </Box>
             </LocalizationProvider>
             <div id="search-input-container" className="search-control-default">
@@ -428,8 +425,8 @@ function MakeEvent({ openDialog, setOpenDialog }) {
 
 const Button = ({ label, type = "button", variant = "primary", onClick }) => {
   const variants = {
-    primary: "bg-white font-bold font-large text-3xl",
-    default: "bg-[#D9D9D9] text-black hover:bg-gray-400 font-medium text-3xl",
+    primary: "bg-[#FFE6BA]  text-3xl font-medium text-orange-600",
+    default: "bg-white text-black hover:bg-gray-200 font-medium text-3xl",
     eventAdd: "bg-orange-400 hover:bg-orange-500 text-3xl	",
   };
 
@@ -437,7 +434,7 @@ const Button = ({ label, type = "button", variant = "primary", onClick }) => {
     <button
       type={type}
       onClick={onClick}
-      className={`px-4 py-2 rounded-[14px] focus:outline-none ${variants[variant]} w-full mb-2`}
+      className={`px-4 py-2 rounded-[10px] focus:outline-none ${variants[variant]} w-full mb-2`}
     >
       {label}
     </button>
@@ -456,6 +453,7 @@ function EventDetails({
   owner,
   bookmarked,
   setBookMarked,
+  date,
 }) {
   const [ownEvent, setownEvent] = useState(false);
 
@@ -511,31 +509,44 @@ function EventDetails({
   }, []);
 
   return (
-    <div className="bg-[#EFD780] p-4 rounded-[30px] flex gap-8 hover:shadow-lg shadow-md">
+    <div className="bg-[#FFEAC8] p-4 rounded-[30px] flex gap-8 hover:shadow-lg shadow-md border-4 border-orange-200">
       <div className="w-80 h-60 flex-shrink-0">
         <img
           src={getPicture(picture)}
           alt="Event picture"
-          className="w-full h-full object-cover  rounded-[30px]"
+          className="w-full h-full object-cover  rounded-[20px]"
         />
       </div>
       <div className="flex flex-col flex-grow justify-between">
-        <div className="flex flex-col text-left ">
+        <div className="flex flex-col text-left gap-2">
           <div>
             <h1
-              className="flex font-bold text-4xl cursor-pointer hover:underline"
+              className="flex font-semibold text-4xl cursor-pointer hover:underline"
               onClick={openEventPage}
             >
               {title}
             </h1>
           </div>
-          <div className="flex text-2xl flex-col ">
+          <div className="flex text-xl flex-col gap-2">
             <div className="flex items-center">
-              <AccessTimeIcon /> {time} | <DateRangeIcon />
-              {location}
+              <div className="line-clamp-1 flex items-center gap-4 ">
+                <div className="flex items-center gap-2 line-clamp-1 text-gray-800">
+                  <AccessTimeIcon />
+                  {time}
+                </div>
+                <div className="flex items-center gap-2 line-clamp-1 text-gray-800">
+                  <DateRangeIcon />
+                  {date}
+                </div>
+                <div className="flex items-center gap-2 line-clamp-1 text-gray-800">
+                  <LocationOnIcon />
+                  {location}
+                </div>
+              </div>
             </div>
-            <br />
-            <div>{body}</div>
+            <div className="line-clamp-3 text-black font-normal">
+              {body}
+            </div>
           </div>
         </div>
 
@@ -545,9 +556,7 @@ function EventDetails({
             bookmarked={bookmarked}
             setBookMarked={setBookMarked}
           />
-
           {ownEvent === true && <EditButton id={id} />}
-
           {ownEvent === true && (
             <DeleteButton
               id={id}
@@ -571,13 +580,18 @@ function SavedEvents({ bookmarked, allEvents }) {
   }, [bookmarked]);
 
   return (
-    <div className="bg-[#D9D9D9] p-5 rounded-[30px] flex gap-4 min-h-40 min-w-[440px] flex flex-col text-start  border-4">
-      <div className="text-3xl flex justify-center font-semibold">
+    <div className="bg-white p-5 rounded-[20px] flex gap-4 min-h-40 min-w-[440px] flex flex-col text-start  border-4">
+      <div className="text-2xl flex justify-start font-semibold pb-2">
         Saved Events
       </div>
       <div className="flex flex-col gap-4">
         {savedEvents.map((eventid) => (
-          <EventItem eventId={eventid} allEvents={allEvents} />
+          <EventItem
+            eventId={eventid}
+            allEvents={allEvents}
+            color={"#FEFBDB"}
+            bgcolor={"#EBE7C7"}
+          />
         ))}
         {savedEvents.length === 0 && (
           <div className="text-2xl text-gray-500 text-center p-4 italic ">
@@ -612,13 +626,18 @@ function RecentlyViewed({ allEvents }) {
   }, [deleteEvent]);
 
   return (
-    <div className="bg-[#D9D9D9] p-5 rounded-[30px] flex gap-4 min-h-40 min-w-[440px] flex flex-col text-start  border-4">
-      <div className="text-3xl text-start font-semibold flex justify-center">
+    <div className="bg-white p-5 rounded-[20px] flex gap-4 min-h-40 min-w-[440px] flex flex-col text-start  border-4">
+      <div className="text-2xl text-start font-semibold flex justify-start pb-2">
         Recently Viewed
       </div>
       <div className="flex flex-col gap-4">
         {recentlyViewedEvents.map((eventid) => (
-          <EventItem eventId={eventid} allEvents={allEvents} />
+          <EventItem
+            eventId={eventid}
+            allEvents={allEvents}
+            color={"#EFF6FF"}
+            bgcolor={"#DCE3EC"}
+          />
         ))}
         {recentlyViewedEvents.length !== 0 && (
           <div
@@ -638,7 +657,8 @@ function RecentlyViewed({ allEvents }) {
   );
 }
 
-function EventItem({ eventId, allEvents }) {
+function EventItem({ eventId, allEvents, color, bgcolor }) {
+  const [isHovered, setIsHovered] = useState(false);
   const [event, setEvent] = useState([]);
   const [day, setDay] = useState([""]);
   const navigate = useNavigate();
@@ -687,10 +707,15 @@ function EventItem({ eventId, allEvents }) {
 
   return (
     <div
-      className="bg-[#EFD780] min-h-16 rounded-[10px]	flex flex-col p-2 cursor-pointer hover:bg-[#E5C453]"
+      className={` min-h-16 rounded-[10px]	flex flex-col p-2 cursor-pointer hover:bg-[#E5C453]`}
+      style={{
+        backgroundColor: isHovered ? bgcolor : color,
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={openEventPage}
     >
-      <div className="font-medium	text-2xl	">
+      <div className="font-medium	text-2xl line-clamp-1">
         {truncateText(event.name, sideCharLimit)}
       </div>
       <div>
@@ -970,37 +995,37 @@ function EditScreen({ event, openDialog, setOpenDialog }) {
               autoComplete="off"
             />
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <Box 
-                display={'flex'}
-                justifyContent={'space-between'}
-                gap={2}
-              >
-              <DatePicker
-                label="Event Date"
-                value={eventDate} 
-                onChange={(newValue) => {
-                  //Converts whatever event date is to UTC 
-                  const utcDate = new Date(Date.UTC(
-                    newValue.getFullYear(),
-                    newValue.getMonth(),
-                    newValue.getDate()
-                  ));
-                  setEventDate(utcDate);
-                }}    
-                renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
-              />
-              <TimePicker
-                label="Event Start"
-                value={eventStart}
-                onChange={(newValue) => setEventStart(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth />}
-              />
-              <TimePicker
-                label="Event End"
-                value={eventEnd}
-                onChange={(newValue) => setEventEnd(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth />}
-              />
+              <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+                <DatePicker
+                  label="Event Date"
+                  value={eventDate}
+                  onChange={(newValue) => {
+                    //Converts whatever event date is to UTC
+                    const utcDate = new Date(
+                      Date.UTC(
+                        newValue.getFullYear(),
+                        newValue.getMonth(),
+                        newValue.getDate()
+                      )
+                    );
+                    setEventDate(utcDate);
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} fullWidth sx={{ marginRight: 4 }} />
+                  )}
+                />
+                <TimePicker
+                  label="Event Start"
+                  value={eventStart}
+                  onChange={(newValue) => setEventStart(newValue)}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
+                />
+                <TimePicker
+                  label="Event End"
+                  value={eventEnd}
+                  onChange={(newValue) => setEventEnd(newValue)}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
+                />
               </Box>
             </LocalizationProvider>
             <div id="search-input-container" className="search-control-default">
@@ -1080,7 +1105,7 @@ function BookMarkButton({ id, bookmarked, setBookMarked }) {
   return (
     <div className="justify-center flex cursor-pointer pointer-events-auto w-full">
       <button
-        className=" flex w-full h-14 gap-2 p-5 bg-[#ADD8E6] hover:bg-[#94CAE1] z-10 rounded-[20px] justify-center items-center text-2xl pointer-events-auto"
+        className=" flex w-full h-14 gap-2 p-5 bg-[#ADD8E6] hover:bg-[#94CAE1] z-10 rounded-[15px] justify-center items-center text-2xl pointer-events-auto"
         onClick={bookMarkEvent}
       >
         {booked === false && (

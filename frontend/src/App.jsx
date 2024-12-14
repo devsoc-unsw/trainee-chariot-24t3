@@ -31,13 +31,13 @@ function App() {
             className="flex p-2 items-center gap-2 hover:underline bg-[#ea580c] rounded-lg text-white"
           >
             {" "}
-            <CalendarMonthIcon sx={{ fontSize: 30 }} /> Events
+            <CalendarMonthIcon sx={{ fontSize: 30 }} /> Event List
           </a>
           <a
             onClick={() => navigate("/")}
             className="p-2 flex items-center gap-2 hover:underline bg-[#ea580c] rounded-lg text-white"
           >
-            <MapIcon sx={{ fontSize: 30 }} /> View Events On Map
+            <MapIcon sx={{ fontSize: 30 }} /> View Events Today
           </a>
           {/* <a onClick={() => navigate("/dummy")}>Dummy</a> */}
         </div>
