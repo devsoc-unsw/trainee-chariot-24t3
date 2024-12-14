@@ -28,63 +28,53 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { useNavigate } from "react-router-dom"
 
-function createMarker(map, poi, color) {
-  const lngLat = Mazemap.Util.getPoiLngLat(poi);
+function createMarker(coord, map, zLevel, color, eventName, eventLocation, eventTime) {
+  const lngLat = coord;
   const marker = new Mazemap.MazeMarker({
     color: color,
     innerCircle: true,
-    innerCircleColor: '#FFF',
+    innerCircleColor: "#FFF",
     size: 34,
     innerCircleScale: 0.5,
-    zLevel: poi.properties.zLevel,
+    zLevel: zLevel,
   })
-  .setLngLat(lngLat)
-  .addTo(map);
+    .setLngLat(coord)
+    .addTo(map);
 
   marker.on("click", () => {
     marker.remove();
-    createMarker(map, poi, "#000000");
+    createMarker(coord, map, zLevel, color);
 
-    new Mazemap.Popup({closeOnClick: true, offset: [0, -6]})
-    .setLngLat( marker.getLngLat() )
-    .setHTML('This is an event description!')
-    .addTo(map);
+    new Mazemap.Popup({ closeOnClick: true, offset: [0, -6] })
+      .setLngLat(marker.getLngLat())
+      .setHTML(`<h3 style="font-weight: bold">${eventName}</h3>
+                <p style="max-width: 160px;">${eventLocation}</p>
+                <p style="max-width: 160px;">${eventTime}</p>`)
+      .addTo(map);
   });
 }
 
-function allOngoingEvents() {
-  const [allEvents, setAllEvents] = useState([]);
+async function allOngoingEvents() {
+  try {
+    const token = localStorage.getItem("token");
+    // hardcoded the state to be "ONGOING"
+    const response = await fetch(
+      "http://localhost:5050/event/eventList?state=ONGOING&token=${token}"
+    );
 
-  useEffect(() => {
-    //Gets all the events that exist at the start
-    const getAllEvents = async () => {
-      const data = await fetchEvents("ONGOING");
-      setAllEvents(data);
-    };
-
-    getAllEvents();
-  }, []);
-
-  const fetchEvents = async (state) => {
-    try {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`http://localhost:5050/event/eventList?state=${state}&token=${token}`);
-  
-      if (!response.ok) {
-        console.log(response.json().message)
-        throw new Error(`Could not fetch the events`);
-      }
-  
-      const responseData = await response.json(); 
-  
-      return responseData.data; 
-    } catch (error) {
-      console.log(error.message)
+    if (!response.ok) {
+      console.log(response.json().message);
+      throw new Error(`Could not fetch the events`);
     }
-  };
 
-  return allEvents;
-};
+    const responseData = await response.json();
+    return responseData.data;
+  } catch (error) {
+    console.log(error.message);
+  }
+  // in case no ongoing events, just return an empty array
+  return [];
+}
 
 function useMazeMap(setEventLocation) {
   const mapRef = useRef(null)
@@ -107,23 +97,30 @@ function useMazeMap(setEventLocation) {
     map.addControl(new window.Mazemap.mapboxgl.NavigationControl());
 
 
-    // const allEvents = allOngoingEvents();
+    allOngoingEvents().then((data) => {
+      data.forEach((item) => {
+        const lngLat = { lng: item.location.lng, lat: item.location.lat };
+        const zLevel = map.zLevel;
+        const name = item.name;
+        const location = `${item.location.building}, ${item.location.room}`;
+        let time = "";
+        if (item.startTime && item.endTime) {
+          time = `${item.startTime} - ${item.endTime}`;
+        }
+        createMarker(lngLat, map, zLevel, "#ff00cc", name, location, time);
+      });
+      console.log(data);
+    });
 
-    // for (const event of allEvents) {
-    //   console.log(event.name);
+
+    // map.on('click', onMapClick);
+
+    // function onMapClick(e){
+    //   const lngLat = e.lngLat;
+    //   const zLevel = map.zLevel;
+    //   createMarker(lngLat, map, zLevel, "#ff00cc", "DevSoc Event", "Blockhouse, G034", "");
     // }
 
-
-    map.on('click', onMapClick);
-
-    function onMapClick(e){
-      const lngLat = e.lngLat;
-      const zLevel = map.zLevel;
-
-      Mazemap.Data.getPoiAt(lngLat, zLevel).then( poi => {
-        createMarker(map, poi, "#ff00cc");
-      }).catch( function(){ return false; } );
-    }
     mapRef.current = map
 
     const mySearch = new window.Mazemap.Search.SearchController({
