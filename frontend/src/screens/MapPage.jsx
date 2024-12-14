@@ -164,9 +164,16 @@ function useMazeMap(setEventLocation) {
             setEventLocation({
               lat: geometry.coordinates[1],
               lng: geometry.coordinates[0],
+<<<<<<< HEAD
               building: properties.buildingname || "",
               room: properties.title || "",
+=======
+              building: properties.dispBldNames[0] || '',
+              room: properties.dispPoiNames[0] || '',
+              title: properties.title || ''
+>>>>>>> 8f9717b30875994b0c762abe1f655036484bb477
             });
+            console.log(e); 
             console.log("hi");
           }
         });
@@ -224,7 +231,47 @@ function AnchorTemporaryDrawer() {
     ) {
       return;
     }
+<<<<<<< HEAD
     setState({ ...state, [anchor]: open });
+=======
+    setState({ ...state, [anchor]: open })
+  }
+
+  const handleCreateEvent = () => {
+    setOpenDialog(true)
+    setState({ ...state, left: false })
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false)
+    setEventName("")
+    setEventDate(null)
+    setEventStart(null)
+    setEventEnd(null)
+    setEventLocation("")
+    setEventDesc("")
+    setThumbnailUrl("")
+  }
+
+const handleSubmitEvent = async () => {
+  if (!eventLocation.lat || !eventLocation.lng) {
+    console.log(eventLocation);
+    alert("Please select a valid location from the map search box.");
+    return;
+  }
+
+  const token = localStorage.getItem("token")  
+
+  const eventData = {
+    name: eventName,
+    date: eventDate,
+    startTime: eventStart,
+    endTime: eventEnd,
+    location: eventLocation,
+    token: token, 
+    desc: eventDesc,
+    imageUrl: thumbnailUrl,
+>>>>>>> 8f9717b30875994b0c762abe1f655036484bb477
   };
 
   const handleCreateEvent = () => {
@@ -285,6 +332,7 @@ function AnchorTemporaryDrawer() {
   };
 
   const menuItems = [
+<<<<<<< HEAD
     { text: "", icon: <CloseIcon />, action: toggleDrawer("left", false) },
     {
       text: "Create New Event",
@@ -301,6 +349,15 @@ function AnchorTemporaryDrawer() {
       },
     },
   ];
+=======
+    { text: "", icon: <CloseIcon />, action: toggleDrawer('left', false) },
+    { text: "Create New Event", icon: <PlaceIcon />, action: handleCreateEvent },
+    // { text: "Edit Event", icon: <CreateIcon />, action: () => {} },
+    // { text: "Saved", icon: <TurnedInIcon />, action: () => {} },
+    { text: "Event List", icon: <ListAltIcon />, action: () => {navigate('/eventList')} },
+  ]
+
+>>>>>>> 8f9717b30875994b0c762abe1f655036484bb477
 
   const list = (anchor) => (
     <Box

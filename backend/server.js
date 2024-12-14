@@ -5,6 +5,7 @@ import { connectDb } from "./config/db.js";
 
 // Models
 import Event from "./models/event.model.js";
+import { Db } from "mongodb";
 
 dotenv.config();
 
@@ -30,8 +31,37 @@ app.post("/event/create", async (req, res) => {
 
   const newEvent = new Event(event);
   try {
-    await newEvent.save();
+    await newEvent.save(); 
     return res.status(201).json({ success: true, data: newEvent });
+  } catch (err) {
+    console.error("Error in creating event", err.message);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
+app.put("/event/:id", async (req, res) => {
+  const event = req.body;
+  const id = req.params.id
+
+  if (!event.name || !event.date || !event.startTime || !event.endTime || !event.location
+    || !event.desc) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Please provide all values" });
+  }
+
+
+  try {
+    const result = await Event.findByIdAndUpdate(
+      id,
+      { ...event },
+    );
+
+    if (!result || result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: "Event not found" });
+    }
+
+    return res.status(201).json({ success: true, data: event });
   } catch (err) {
     console.error("Error in creating event", err.message);
     return res.status(500).json({ success: false, message: "Server Error" });
@@ -76,7 +106,7 @@ async function eventListFind(state, token) {
       //Sorts the event List by dates of events that are greater than the current date
       //Sorted in ascending order 
       ; 
-      eventList = await Event.find({ date: { $gte: currentDate }}).sort({ date: 1});
+      eventList = await Event.find({ date: { $gte: currentDate }}).sort({ date: 1, startTime: 1});
     } else if (state === "ONGOING") {
       //Comment: Will we have a start time and end time ??? 
       //Currently it will return the events hapening today 
@@ -85,7 +115,7 @@ async function eventListFind(state, token) {
           $gte: new Date(currentDate.setHours(0, 0, 0, 0)),
           $lte: new Date(currentDate.setHours(23, 59, 59, 999))
         }
-      }).sort({date: 1}); 
+      }).sort({ date: 1, startTime: 1}); 
 
     } else if (state === "NEWEST") {
       //Sorts the event List by created time and in descending order 
@@ -94,7 +124,7 @@ async function eventListFind(state, token) {
       console.log("hello");
       console.log(token.toString()); 
       //Finds all events by the user with the token 
-      eventList = await Event.find({ token: token }); 
+      eventList = await Event.find({ token: token }).sort({createdAt: -1})
     }
 
     // if (!eventList || eventList.length === 0) {

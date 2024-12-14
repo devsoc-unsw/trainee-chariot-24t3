@@ -18,26 +18,26 @@ function App() {
   const navigate = useNavigate();
   return (
     <>
-      <div className="flex bg-[#FFA438] h-20 justify-between text-4xl pl-10 pr-10 items-center">
-        <div className="flex gap-4 items-center cursor-pointer ">
+      <div className="flex bg-[#F97316] h-20 justify-between text-2xl pl-10 pr-10 items-center">
+        <div className="flex gap-4 items-center cursor-pointer text-4xl text-white">
           <img src={LostOnCampusLogo} alt="LostOnCampus Logo"></img>
           <p>
-            Bored<a className="text-yellow-300	">On</a>Campus
+            Bored<a className="">On</a>Campus
           </p>
         </div>
-        <div className="flex gap-2 cursor-pointer ">
+        <div className="flex gap-4 cursor-pointer ">
           <a
             onClick={() => navigate("/eventList")}
-            className="flex p-2 items-center gap-2 hover:underline"
+            className="flex p-2 items-center gap-2 hover:underline bg-[#ea580c] rounded-lg text-white"
           >
             {" "}
-            <CalendarMonthIcon sx={{ fontSize: 48 }} /> Events
+            <CalendarMonthIcon sx={{ fontSize: 30 }} /> Events
           </a>
           <a
             onClick={() => navigate("/")}
-            className="p-2 flex items-center gap-2 hover:underline"
+            className="p-2 flex items-center gap-2 hover:underline bg-[#ea580c] rounded-lg text-white"
           >
-            <MapIcon sx={{ fontSize: 48 }} /> View Events On Map
+            <MapIcon sx={{ fontSize: 30 }} /> View Events On Map
           </a>
           {/* <a onClick={() => navigate("/dummy")}>Dummy</a> */}
         </div>

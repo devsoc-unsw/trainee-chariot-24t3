@@ -10,7 +10,8 @@ const eventSchema = new mongoose.Schema(
       lat: {type: Number}, 
       lng: {type: Number}, 
       building: { type: String },
-      room: { type: String }
+      room: { type: String }, 
+      title: { type: String }
     }, 
     token: { type: String, required: true },
     desc: {type: String},
