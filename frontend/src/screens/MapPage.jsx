@@ -13,8 +13,6 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import PlaceIcon from "@mui/icons-material/Place";
-import CreateIcon from "@mui/icons-material/Create";
-import TurnedInIcon from "@mui/icons-material/TurnedIn";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import CloseIcon from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
@@ -35,7 +33,9 @@ function createMarker(
   color,
   eventName,
   eventLocation,
-  eventTime
+  eventTime,
+  eventId,
+  navigate
 ) {
   const marker = new Mazemap.MazeMarker({
     color: color,
@@ -58,17 +58,33 @@ function createMarker(
       color,
       eventName,
       eventLocation,
-      eventTime
+      eventTime,
+      eventId,
+      navigate
     );
+
+    const popupContent = `
+    <div id="popup-content">
+      <h3 style="font-weight: bold">${eventName}</h3>
+      <p style="max-width: 160px;">${eventLocation}</p>
+      <p style="max-width: 160px;">${eventTime}</p>
+    </div>
+  `;
 
     new Mazemap.Popup({ closeOnClick: true, offset: [0, -25] })
       .setLngLat(marker.getLngLat())
-      .setHTML(
-        `<h3 style="font-weight: bold">${eventName}</h3>
-                <p style="max-width: 160px;">${eventLocation}</p>
-                <p style="max-width: 160px;">${eventTime}</p>`
-      )
+      .setHTML(popupContent)
       .addTo(map);
+
+    map.once("render", () => {
+      const popupElement = document.getElementById("popup-content");
+      if (popupElement) {
+        popupElement.addEventListener("click", () => {
+          console.log("I clicked");
+          navigate(`/event/${eventId}`);
+        });
+      }
+    });
   });
 }
 
@@ -99,6 +115,7 @@ function useMazeMap(setEventLocation) {
   const searchInputRef = useRef(null);
   const suggestionsRef = useRef(null);
   const searchInputInstanceRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.Mazemap) return;
@@ -132,18 +149,20 @@ function useMazeMap(setEventLocation) {
             hour12: true,
           })}`;
         }
-        createMarker(lngLat, map, zLevel, "#ff00cc", name, location, time);
+        createMarker(
+          lngLat,
+          map,
+          zLevel,
+          "#ff00cc",
+          name,
+          location,
+          time,
+          item._id,
+          navigate
+        );
       });
       console.log(data);
     });
-
-    // map.on('click', onMapClick);
-
-    // function onMapClick(e){
-    //   const lngLat = e.lngLat;
-    //   const zLevel = map.zLevel;
-    //   createMarker(lngLat, map, zLevel, "#ff00cc", "DevSoc Event", "Blockhouse, G034", "");
-    // }
 
     mapRef.current = map;
 
