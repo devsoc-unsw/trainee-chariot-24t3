@@ -259,7 +259,7 @@ const handleSubmitEvent = async () => {
               ><DatePicker
                 label="Event Date"
                 value={eventDate}
-                onChange={(newValue) => setEventDate(newValue)}
+                onChange={(newValue) => setEventDate(newValue.toISOString().split('T')[0])}
                 renderInput={(params) => <TextField {...params} fullWidth sx={{ marginRight: 4 }}/>}
               />
               <TimePicker
