@@ -66,43 +66,58 @@ function EventPage() {
   return (
     <div>
       <div className="w-full h-screen bg-[#FFF3E2]">
-        <div className="font-bold text-3xl p-8">
+        <div className="font-bold text-4xl p-8">
           {event.name}
         </div>
         <div className="flex justify-center">
           <img
             src={getPicture(event.imageUrl)}
             alt="Arc Logo"
-            className="h-auto rounded-lg shadow-lg z-10 w-[500px] h-[300px] "
+            className="rounded-lg shadow-lg z-10 w-auto h-[350px] "
           ></img>
         </div>
 
-        <div className="relative bottom-48 w-full h-48 overflow-hidden">
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-full bg-[#E1BA57] rounded-t-full"></div>
-        </div>
+        <svg
+          className="absolute top-[34.2%] left-0 w-full h-32"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="#c96e2e"
+            d="M0,320C240,160,720,0,1440,320L1440,320L0,320Z"
+          ></path>
+        </svg>
 
-        <div className="relative bottom-48 w-full h-[30%] bg-[#E1BA57]">
-          <div className="flex items-center h-60">
-            <div className="flex-1 p-4">
-              <h2 className="text-3xl font-semibold text-white p-6">Where</h2>
-              
-              <p className="text-xl text-white">{event.location.room.replace(/<[^>]*>/g, '') + " " +event.location.building.replace(/<[^>]*>/g, '')}</p>
-            </div>
-            <div className="flex-1 p-4">
-              <h2 className="text-3xl font-semibold text-white p-6">When</h2>
-              <p className="text-xl text-white">{new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) + "-" + new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })} {day}</p>
-            </div>
+        <div className="flex absolute left-0 top-[50%] w-full h-[60vh] bg-[#c96e2e] p-4 items-center">
+          <div className="flex-1 p-4">
+            <h2 className="text-4xl font-semibold text-white p-6">Where</h2>
+            <p className="text-2xl text-white">{event.location.room.replace(/<[^>]*>/g, '')}</p>
+            <p className="text-2xl text-white">{event.location.building.replace(/<[^>]*>/g, '')}</p>
+          </div>
+          <div className="flex-1 p-4">
+            <h2 className="text-4xl font-semibold text-white p-6">When</h2>
+            <p className="text-2xl text-white">{new Date(event.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }) + "-" + new Date(event.endTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}</p>
+            <p className="text-2xl text-white">{day}</p>
           </div>
         </div>
 
-        <div className="relative bottom-48 w-full h-48 overflow-hidden">
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-full bg-[#E1BA57] rounded-b-full"></div>
-        </div>
+        <svg
+          className="absolute top-[110%] left-0 w-full h-32"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="#c96e2e"
+            d="M0,0C240,160,720,320,1440,0L1440,0L0,0Z"
+          ></path>
+        </svg>
       </div>
 
-      <div className="h-screen flex flex-col items-center justify-center w-full bg-[#FCFDAF] z-25">
-        <div className="font-bold text-3xl z-10">Description</div>
-        <div className="text-3xl p-8 w-[50%] z-10 whitespace-pre-wrap">
+      <div className="flex flex-col items-center justify-center w-full bg-[#FFE6BA] z-25 p-20 min-h-screen">
+        <div className="font-bold text-3xl z-10 p-8">Description</div>
+        <div className="text-3xl w-[50%] z-10 whitespace-pre-wrap p-8">
           {event.desc || 'No description available'}
         </div>
       </div>
