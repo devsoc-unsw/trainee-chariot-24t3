@@ -153,7 +153,7 @@ function useMazeMap(setEventLocation) {
           lngLat,
           map,
           zLevel,
-          "#ff00cc",
+          "#ea580c",
           name,
           location,
           time,
