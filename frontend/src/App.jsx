@@ -18,11 +18,12 @@ function App() {
   const navigate = useNavigate();
   return (
     <>
-      <div className="flex bg-[#F97316] h-20 justify-between text-2xl pl-10 pr-10 items-center">
-        <div className="flex gap-4 items-center cursor-pointer text-4xl text-white">
-          <img src={LostOnCampusLogo} alt="LostOnCampus Logo"></img>
-          <p>
-            Bored<a className="">On</a>Campus
+      <div className="flex bg-[#F97316] h-30% justify-between lg:text-2xl text-base pl-10 pr-10 items-center md:flex-nowrap md:flex-row flex-col">
+        <div className="flex gap-4 items-center cursor-pointer lg:text-4xl sm:text-4xl md:text-4xl text-white flex-nowrap md:flex-row flex-col lg:p-0 ">
+          <img src={LostOnCampusLogo} alt="LostOnCampus Logo" className="lg-md:lg-28 md:h-16 lg:w-32 lg:h-20">
+          </img>
+          <p className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl flex-nowrap">
+            Bored On Campus 
           </p>
         </div>
         <div className="flex gap-4 cursor-pointer ">

@@ -126,9 +126,9 @@ export default function EventList() {
   };
 
   return (
-    <div className="bg-[#FFF3E2] min-h-screen shadow-inner pl-10 pr-10 ">
+    <div className="bg-[#FFF3E2] min-h-screen shadow-inner pl-10 pr-10">
       <div className="flex justify-start text-3xl text-[#6F6F6F] pt-5 pb-5">
-        Events
+        All Events
       </div>
       <div className="flex justify-between gap-10">
         <div className="flex">
@@ -136,9 +136,9 @@ export default function EventList() {
             <NavigationList onActiveButtonChange={handleActiveButtonChange} />
           </div>
         </div>
-        <div className="flex-grow">
+        <div className="">
           <div className="text-3xl pb-16">
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-8 max-w-7xl">
               {events.map((event) => (
                 <EventDetails
                   key={event._id}
@@ -195,8 +195,8 @@ function NavigationList({ onActiveButtonChange }) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-[20px] h-[18rem] w-64 flex flex-col content-between gap-[40px] border-4 ">
-      <div className="flex flex-col gap-1">
+    <div className="bg-white p-4 rounded-[20px] h-10 lg:h-96 lg:max-h-96 w-60 flex flex-col content-between gap-[40px] border-4 ">
+      <div className="flex lg:flex-col text-2xl items-center flex-row gap-1">
         <div className="w-full justify-start flex">
           <Button
             label="Upcoming"
@@ -425,9 +425,9 @@ function MakeEvent({ openDialog, setOpenDialog }) {
 
 const Button = ({ label, type = "button", variant = "primary", onClick }) => {
   const variants = {
-    primary: "bg-[#FFE6BA]  text-3xl font-medium text-orange-600",
-    default: "bg-white text-black hover:bg-gray-200 font-medium text-3xl",
-    eventAdd: "bg-orange-400 hover:bg-orange-500 text-3xl	",
+    primary: "bg-[#FFE6BA]  lg:text-3xl font-medium text-orange-600",
+    default: "bg-white text-black hover:bg-gray-200 font-medium lg:text-3xl",
+    eventAdd: "bg-orange-400 hover:bg-orange-500 lg:text-3xl	",
   };
 
   return (
@@ -509,7 +509,7 @@ function EventDetails({
   }, []);
 
   return (
-    <div className="bg-[#FFEAC8] p-4 rounded-[30px] flex gap-8 hover:shadow-lg shadow-md border-4 border-orange-200">
+    <div className="bg-[#FFEAC8] p-4 rounded-[30px] flex flex-col 2xl:flex-row gap-8 hover:shadow-lg shadow-md border-4 border-orange-200">
       <div className="w-80 h-60 flex-shrink-0">
         <img
           src={getPicture(picture)}
@@ -580,7 +580,7 @@ function SavedEvents({ bookmarked, allEvents }) {
   }, [bookmarked]);
 
   return (
-    <div className="bg-white p-5 rounded-[20px] flex gap-4 min-h-40 min-w-[440px] flex flex-col text-start  border-4">
+    <div className="bg-white p-5 rounded-[20px] w-[32rem] flex gap-4 flex flex-col text-start  border-4 hidden lg:block">
       <div className="text-2xl flex justify-start font-semibold pb-2">
         Saved Events
       </div>
@@ -626,7 +626,7 @@ function RecentlyViewed({ allEvents }) {
   }, [deleteEvent]);
 
   return (
-    <div className="bg-white p-5 rounded-[20px] flex gap-4 min-h-40 min-w-[440px] flex flex-col text-start  border-4">
+    <div className="bg-white p-5 rounded-[20px] flex gap-4 w-full flex flex-col text-start  border-4">
       <div className="text-2xl text-start font-semibold flex justify-start pb-2">
         Recently Viewed
       </div>
